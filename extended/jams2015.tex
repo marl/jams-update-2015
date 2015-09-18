@@ -137,13 +137,46 @@ specification will be referred to as \emph{JAMS2}.
 In this section, we highlight the changes to the JAMS schema definition(s).
 Since these changes apply to the file structure definition itself, they are independent of the software implementation used to parse or generate JAMS files.
 
-\subsection{Tasks and namespaces}\label{sec:schema:annotations}
+
+\subsection{Unified observation types}\label{sec:schema:annotations}
+
+In JAMS1, there are four basic data types: \emph{observation}, \emph{event}, \emph{range}, and \emph{time series}.
+The latter three types define different ways of encoding the time index of an observation.
+\emph{Event} is used for observations with no temporal duration (such as beats or onsets);
+\emph{range} is used for observations that span a fixed portion of time (such as chords or segments); 
+and \emph{time series} is used to encode temporally continuous observations, such as melodic contours.
+
+These three distinct views lead to efficient, compact representations, but can be difficult to work with in practice.  Different
+tasks (see \cref{sec:schema:task}) generally use different time indexes, so the practitioner must both be aware of which index is 
+used for any given task, and write code to handle it accordingly.  Moreover, it becomes non-trivial to temporally align annotations across
+different tasks, since they must be mapped into a common representation.
+
+JAMS2 simplifies this by reducing all observation types to a single format: regardless of task, each \emph{observation} consists of a 
+4-tuple \emph{(time, duration, value, confidence)}.
+The \emph{time} and \emph{duration} fields are constrained by the schema to be non-negative numbers.\footnote{The \emph{value} and
+\emph{confidence} fields are left unconstrained at this point, but are defined subsequently depending on the \emph{namespace} as defined
+in \cref{sec:schema:task}.}
+By default, this simulates the \emph{range} type of JAMS1, but taking \emph{duration}$=0$ recovers the \emph{event}
+type as well, with a small amount of redundancy.
+
+The \emph{time series} type of JAMS1 can be viewed as an efficiently coded, dense sequence of \emph{range} observations with implicit
+durations.
+Recall that in JAMS1, each \emph{Annotation} object contains a list of observations in its \emph{data} field.
+For high-frequency observations --- such as melodic contours, sampled at 10Hz or greater --- encoding a 4-tuple for each
+sample would be inefficient, due to redundantly listing the keys \emph{time, value, duration, confidence}.
+JAMS2 circumvents this by allowing a distinction between \emph{sparse} and \emph{dense} observation lists.
+Note that having standardized the observation format, the \emph{Annotation}'s data field can be interpreted as an $n\times 4$ table, which
+may be encoded in either a row-major (\emph{sparse}) or column-major (\emph{dense}) format.
+While the column-major format is generally more spatially efficient, the row-major format is more human-readable, and generally preferable for most tasks.
+
+
+\subsection{Tasks and namespaces}\label{sec:schema:task}
 
 As illustrated in Figure~\cref{jams1}, JAMS1 took a \emph{task-major} approach to structuring annotations.  A collection of supported tasks was
 defined within the JAMS1 schema, such as \emph{tag}, \emph{genre}, \emph{chord}, \emph{key}, \emph{melody}, \emph{etc}.  Annotations of a
-particular task would then be accessed by indexing the array of annotations corresponding to that task, \emph{e.g.},
-\begin{lstlisting}[language=python]
-  >>> beat_annotation = jams_object.beat[0]
+particular task would then be accessed by indexing the array of annotations corresponding to that task, \emph{e.g.}:
+\begin{lstlisting}[language=json]
+  jams_object.beat[0]
 \end{lstlisting}
 
 This structure is conceptually simple and easy to work with, but it poses several practical limitations.
@@ -165,8 +198,6 @@ comparable.
 
 
 
-
-\subsection{Observations}\label{sec:schema:annotations}
 
 
 \section{Implementation}\label{sec:implementation}
