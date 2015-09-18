@@ -13,6 +13,7 @@
 \usepackage{authblk}
 \usepackage{booktabs}
 \usepackage{bera}
+\usepackage{multirow}
 
 \colorlet{punct}{red!60!black}
 \definecolor{background}{HTML}{EEEEEE}
@@ -141,6 +142,8 @@ Since these changes apply to the file structure definition itself, they are inde
 \subsection{Unified observation types}\label{sec:schema:annotations}
 
 In JAMS1, there are four basic data types: \emph{observation}, \emph{event}, \emph{range}, and \emph{time series}.
+The \emph{observation} type is used to encode a fixed observed quantity, such as as chord label or semantic tag, as well as a quantitative
+measure of confidence in the value.\footnote{A secondary value field is also provided, but we ignore it here for expository purposes.}
 The latter three types define different ways of encoding the time index of an observation.
 \emph{Event} is used for observations with no temporal duration (such as beats or onsets);
 \emph{range} is used for observations that span a fixed portion of time (such as chords or segments); 
@@ -167,8 +170,18 @@ sample would be inefficient, due to redundantly listing the keys \emph{time, val
 JAMS2 circumvents this by allowing a distinction between \emph{sparse} and \emph{dense} observation lists.
 Note that having standardized the observation format, the \emph{Annotation}'s data field can be interpreted as an $n\times 4$ table, which
 may be encoded in either a row-major (\emph{sparse}) or column-major (\emph{dense}) format.
-While the column-major format is generally more spatially efficient, the row-major format is more human-readable, and generally preferable for most tasks.
+While the column-major format is generally more spatially efficient, the row-major format is more legible, 
+and generally preferable for most tasks.
 
+Standardizing the observation format both simplifies upstream code to interact with JAMS objects, and generalizes the previous
+definitions. (For instance, time series now have explicit durations/sampling rates, and gaps are permitted.)
+The one thing that we lose in this process is the notion of time-independent annotations, such as \emph{tag}, \emph{genre}, and \emph{mood} 
+in JAMS1.
+This is because all observations in JAMS2 are required to have a time and (potentially 0) duration.
+However, we argue that this is an advantage for three reasons.  First, it is possible to have full-track observations by setting
+\emph{time}$=0$ and $\emph{duration}$ to the full track duration.  Second, in reality, every observation type may vary over time, so the
+schema should support this.  Finally, it forces the annotator to be explicit about the valid timing of an observation, and facilitates
+partial annotation (see \cref{sec:future}).
 
 \subsection{Tasks and namespaces}\label{sec:schema:task}
 
@@ -196,9 +209,67 @@ Rock corpus.
 In these cases, it is hardly sensible to group these variations together under a single task, since their annotations are not directly
 comparable.
 
+JAMS2 resolves these issues by adopting an an\-notation-major (rather than task-major) structure, and introducing the \emph{namespace}
+abstraction.
 
+Instead of grouping annotations by task at the top-level, a JAMS2 object contains a single list of \emph{Annotations}.
+This allows for the same core schema to be retained as new tasks are introduced, since there is no explicit dependence on the task
+definitions.
 
+Each annotation object declares its task through the \emph{namespace} field.
+A \emph{namespace} in JAMS2 is simply a partial schema declaration which defines the following properties:
+\begin{itemize}
+    \item an identifier, \emph{e.g.}, ``beat'' or ``tag\_cal500'';
+    \item schema declarations for the \emph{value} and \emph{confidence} fields;
+    \item whether data should be encoded in \emph{dense} or \emph{sparse} form.
+\end{itemize}
+The identifier is within \emph{Annotation} objects to specify which namespace they should be validated against.
+The schema declarations for \emph{value} and \emph{confidence} are both optional, but can be used to impose constraints on the permissible
+contents of an observation. 
+This abstraction allows for both a more general set of supported tasks, in that there may be many \emph{tag} namespaces, 
+and more precise task definitions for each specific namespace.
+For instance, a valid \emph{tag\_cal500} annotation must have a value drawn from the correct vocabulary, whereas a \emph{tag\_open}
+annotation may contain any string in its \emph{value} field; however, in both cases, the value must be a string, and this constraint was
+not possible in the JAMS1 schema.
 
+For convenience, namespaces are grouped into high-level task categories by their identifiers.
+We stress that this grouping is merely cosmetic, and there is no strict underlying hierarchy of tasks.
+\Cref{tab:namespaces} lists the namespaces supported in JAMS v0.2.0.
+
+\begin{table}
+    \caption{Namespaces supported in JAMS v0.2.0.}\label{tab:namespaces}
+    \centering
+    \begin{tabular}{rl}
+    \toprule
+    Task group                  & Namespace\\
+    \midrule
+    \multirow{2}{*}{Beat}       & \texttt{beat}\\
+                                & \texttt{beat\_position}\\
+    \multirow{3}{*}{Chord}      & \texttt{chord}\\
+                                & \texttt{chord\_harte}\\
+                                & \texttt{chord\_roman}\\
+    Key                         & \texttt{key\_mode }\\
+    Lyrics                      & \texttt{lyrics}\\
+    Mood                        & \texttt{mood\_thayer}\\
+    Onset                       & \texttt{onset}\\
+    Pattern                     & \texttt{pattern\_jku}\\
+    \multirow{3}{*}{Pitch}      & \texttt{pitch\_class}\\
+                                & \texttt{pitch\_hz}\\
+                                & \texttt{pitch\_midi}\\
+    \multirow{5}{*}{Segment}    & \texttt{segment\_open}\\
+                                & \texttt{segment\_salami\_function}\\
+                                & \texttt{segment\_salami\_upper}\\
+                                & \texttt{segment\_salami\_lower}\\
+                                & \texttt{segment\_salami\_tut}\\
+    \multirow{5}{*}{Tag}        & \texttt{tag\_cal10k}\\
+                                & \texttt{tag\_cal500}\\
+                                & \texttt{tag\_gtzan}\\
+                                & \texttt{tag\_medleydb\_instruments}\\
+                                & \texttt{tag\_open}\\
+    Tempo                       & \texttt{tempo}\\
+    \bottomrule
+    \end{tabular}
+\end{table}
 
 \section{Implementation}\label{sec:implementation}
 
@@ -207,13 +278,14 @@ comparable.
 \subsection{Data frames}\label{sec:imp:dataframe}
 \subsection{Validation}\label{sec:imp:validation}
 \subsection{mir\_eval integration}\label{sec:imp:mireval}
-\subsection{JAMZ compression}\label{sec:imp:compression}
+\subsection{IO, compression, JAMZ}\label{sec:imp:compression}
 
 \section{Future directions}\label{sec:future}
 
 \subsection{Namespace conversions}
 \subsection{Local namespaces and unstructured data}
 \subsection{Partial annotations}
+\subsection{Quick-view}
 
 \bibliography{refs}
 
