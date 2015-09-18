@@ -6,11 +6,50 @@
 \documentclass{article}
 \usepackage{ismir,amsmath,cite}
 \usepackage{graphicx}
-\usepackage{color}
+\usepackage{xcolor}
+\usepackage{listings}
 \usepackage{url}
 \usepackage{cleveref}
 \usepackage{authblk}
 \usepackage{booktabs}
+\usepackage{bera}
+
+\colorlet{punct}{red!60!black}
+\definecolor{background}{HTML}{EEEEEE}
+\definecolor{delim}{RGB}{20,105,176}
+\colorlet{numb}{magenta!60!black}
+
+\lstdefinelanguage{json}{
+    basicstyle=\normalfont\ttfamily,
+    numbers=left,
+    numberstyle=\scriptsize,
+    stepnumber=1,
+    numbersep=8pt,
+    showstringspaces=false,
+    breaklines=true,
+    frame=lines,
+    backgroundcolor=\color{background},
+    literate=
+     *{0}{{{\color{numb}0}}}{1}
+      {1}{{{\color{numb}1}}}{1}
+      {2}{{{\color{numb}2}}}{1}
+      {3}{{{\color{numb}3}}}{1}
+      {4}{{{\color{numb}4}}}{1}
+      {5}{{{\color{numb}5}}}{1}
+      {6}{{{\color{numb}6}}}{1}
+      {7}{{{\color{numb}7}}}{1}
+      {8}{{{\color{numb}8}}}{1}
+      {9}{{{\color{numb}9}}}{1}
+      {:}{{{\color{punct}{:}}}}{1}
+      {,}{{{\color{punct}{,}}}}{1}
+      {\{}{{{\color{delim}{\{}}}}{1}
+      {\}}{{{\color{delim}{\}}}}}{1}
+      {[}{{{\color{delim}{[}}}}{1}
+      {]}{{{\color{delim}{]}}}}{1},
+}
+
+\lstset{language=python,frame=none}
+\lstset{language=json,frame=lines}
 
 \renewcommand\Authfont{\bfseries}
 
@@ -90,11 +129,45 @@ format and implementation between v0.1 and v0.2.
 %
 \section{Introduction}\label{sec:introduction}
 
-\section{JAMS specification}\label{sec:schema}
+Throughout this document, the previous specification of JAMS as described by Humphrey
+\emph{et al.}~\cite{jams2014} will be referred to as \emph{JAMS1}, while the current
+specification will be referred to as \emph{JAMS2}.
 
-\subsection{Annotations}\label{sec:schema:annotations}
+\section{JAMS specification}\label{sec:schema}
+In this section, we highlight the changes to the JAMS schema definition(s).
+Since these changes apply to the file structure definition itself, they are independent of the software implementation used to parse or generate JAMS files.
+
+\subsection{Tasks and namespaces}\label{sec:schema:annotations}
+
+As illustrated in Figure~\cref{jams1}, JAMS1 took a \emph{task-major} approach to structuring annotations.  A collection of supported tasks was
+defined within the JAMS1 schema, such as \emph{tag}, \emph{genre}, \emph{chord}, \emph{key}, \emph{melody}, \emph{etc}.  Annotations of a
+particular task would then be accessed by indexing the array of annotations corresponding to that task, \emph{e.g.},
+\begin{lstlisting}[language=python]
+  >>> beat_annotation = jams_object.beat[0]
+\end{lstlisting}
+
+This structure is conceptually simple and easy to work with, but it poses several practical limitations.
+First, it requires that all tasks be specified \emph{a priori} within the JAMS schema.
+Consequently, each time a new task is introduced in the future, the core JAMS schema must be modified to accommodate it.
+This is clearly undesirable, as it could lead to fragmentation of the JAMS specification if (when) different groups decide to extend the task definitions in one direction or another.
+
+Second, it provides no means of distinguishing between different variations of a task.
+As a simple example, take the case of \emph{tags}.
+Different data sets are annotated using different vocabularies, which may be closed
+(\emph{e.g.}, GTZAN or CAL500) or open (\emph{e.g.}, last.fm).
+This implies that the validity of a tag annotation depends upon the target vocabulary, which is not explicitly coded within the schema.
+(Indeed, an exhaustive coding of tag vocabularies within a fixed schema is impossible.) 
+As a more nuanced example, \emph{chord} annotations can be drawn from different vocabularies (\emph{e.g.}, including or suppressing extensions),
+or even radically different annotation styles, such as the pop-style annotations of Isophonics compared to the roman numeral annotations of the
+Rock corpus.
+In these cases, it is hardly sensible to group these variations together under a single task, since their annotations are not directly
+comparable.
+
+
+
+
 \subsection{Observations}\label{sec:schema:annotations}
-\subsection{Task namespaces}\label{sec:schema:annotations}
+
 
 \section{Implementation}\label{sec:implementation}
 
@@ -111,35 +184,6 @@ format and implementation between v0.1 and v0.2.
 \subsection{Local namespaces and unstructured data}
 \subsection{Partial annotations}
 
-\section{Citations}
-
-All bibliographical references should be listed at the end,
-inside a section named ``REFERENCES,'' numbered and in alphabetical order.
-All references listed should be cited in the text.
-When referring to a document, type the number in square brackets
-\cite{Author:00}, or for a range \cite{Author:00,Someone:10,Someone:04}.
-
-% For bibtex users:
 \bibliography{refs}
-
-% For non bibtex users:
-%\begin{thebibliography}{citations}
-%
-%\bibitem {Author:00}
-%E. Author.
-%``The Title of the Conference Paper,''
-%{\it Proceedings of the International Symposium
-%on Music Information Retrieval}, pp.~000--111, 2000.
-%
-%\bibitem{Someone:10}
-%A. Someone, B. Someone, and C. Someone.
-%``The Title of the Journal Paper,''
-%{\it Journal of New Music Research},
-%Vol.~A, No.~B, pp.~111--222, 2010.
-%
-%\bibitem{Someone:04} X. Someone and Y. Someone. {\it Title of the Book},
-%    Editorial Acme, Porto, 2012.
-%
-%\end{thebibliography}
 
 \end{document}
