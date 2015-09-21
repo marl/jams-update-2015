@@ -6,7 +6,7 @@
 \documentclass{article}
 \usepackage{ismir,amsmath,cite}
 \usepackage{graphicx}
-\usepackage{xcolor}
+\usepackage[table]{xcolor}
 \usepackage{listings}
 \usepackage{url}
 \usepackage{cleveref}
@@ -99,17 +99,17 @@
 %  {Fourth author} {Affiliation4 \\ {\tt author4@ismir.edu}}
 
 \author[1,2,*]{Brian~McFee}
-\author[2,3]{Eric~J. Humphrey}
-\author[2,4]{Oriol~Nieto}
-\author[2,5]{Justin~Salamon}
-\author[2]{Rachel~Bittner}
-\author[2]{Jon~Forsyth}
-\author[2]{Juan~P. Bello}
-\affil[1]{Center for Data Science, New York University}
-\affil[2]{Music and Audio Research Laboratory, New York University}
-\affil[3]{MuseAmi, Inc.}
-\affil[4]{Pandora, Inc.}
-\affil[5]{Center for Urban Science and Progress, New York University}
+\author[4]{Eric~J. Humphrey}
+\author[5]{Oriol~Nieto}
+\author[2,3]{Justin~Salamon}
+\author[1]{Rachel~Bittner}
+\author[1]{Jon~Forsyth}
+\author[1]{Juan~P. Bello}
+\affil[1]{Music and Audio Research Laboratory, New York University}
+\affil[2]{Center for Data Science, New York University}
+\affil[3]{Center for Urban Science and Progress, New York University}
+\affil[4]{MuseAmi, Inc.}
+\affil[5]{Pandora, Inc.}
 
 \def\authorname{Brian~McFee, Eric~J. Humphrey, Oriol~Nieto, Justin~Salamon,
     Rachel~M. Bittner, Jon~Forsyth, Juan~P. Bello}
@@ -130,9 +130,17 @@ format and implementation between v0.1 and v0.2.
 %
 \section{Introduction}\label{sec:introduction}
 
+The JSON Annotated Music Specification (JAMS) format was proposed by Humphrey \emph{et al.}~\cite{jams2014}
+as a mechanism to serialize structured annotations for musical content.
+Since the initial publication of the JAMS specification, we (the developers) have learned several lessons in building music information retrieval infrastructure on top of the existing
+framework.
+Consequently, we have revised the specification and implementation in various ways to better support a modern and extensible workflow.
+The purpose of this document is to explain the changes in JAMS following the first publication, describe their underlying motivation, and demonstrate how to effectively apply the current
+(v0.2.0) implementation.
+
 Throughout this document, the previous specification of JAMS as described by Humphrey
-\emph{et al.}~\cite{jams2014} will be referred to as \emph{JAMS1}, while the current
-specification will be referred to as \emph{JAMS2}.
+\emph{et al.}~\cite{jams2014} will be referred to as \emph{JAMS-0.1}, while the current
+specification will be referred to as \emph{JAMS-0.2}.
 
 \section{JAMS specification}\label{sec:schema}
 In this section, we highlight the changes to the JAMS schema definition(s).
@@ -141,7 +149,13 @@ Since these changes apply to the file structure definition itself, they are inde
 
 \subsection{Unified observation types}\label{sec:schema:annotations}
 
-In JAMS1, there are four basic data types: \emph{observation}, \emph{event}, \emph{range}, and \emph{time series}.
+In JAMS-0.1, there are four basic data types:
+\begin{itemize}
+    \item \emph{observation},
+    \item \emph{event},
+    \item \emph{range}, and
+    \item \emph{time series}.
+\end{itemize}
 The \emph{observation} type is used to encode a fixed observed quantity, such as as chord label or semantic tag, as well as a quantitative
 measure of confidence in the value.\footnote{A secondary value field is also provided, but we ignore it here for expository purposes.}
 The latter three types define different ways of encoding the time index of an observation.
@@ -150,43 +164,43 @@ The latter three types define different ways of encoding the time index of an ob
 and \emph{time series} is used to encode temporally continuous observations, such as melodic contours.
 
 These three distinct views lead to efficient, compact representations, but can be difficult to work with in practice.  Different
-tasks (see \cref{sec:schema:task}) generally use different time indexes, so the practitioner must both be aware of which index is 
-used for any given task, and write code to handle it accordingly.  Moreover, it becomes non-trivial to temporally align annotations across
-different tasks, since they must be mapped into a common representation.
+tasks generally use different time index types, so the practitioner must both be aware of which index is 
+used for any given task, and write code to handle it accordingly.
+Moreover, it becomes non-trivial to temporally align annotations across different tasks, since they must first be mapped into a common representation.
 
-JAMS2 simplifies this by reducing all observation types to a single format: regardless of task, each \emph{observation} consists of a 
+JAMS-0.2 simplifies this by reducing all observation types to a single format: regardless of task, each \emph{observation} consists of a 
 4-tuple \emph{(time, duration, value, confidence)}.
 The \emph{time} and \emph{duration} fields are constrained by the schema to be non-negative numbers.\footnote{The \emph{value} and
 \emph{confidence} fields are left unconstrained at this point, but are defined subsequently depending on the \emph{namespace} as defined
 in \cref{sec:schema:task}.}
-By default, this simulates the \emph{range} type of JAMS1, but taking \emph{duration}$=0$ recovers the \emph{event}
+By default, this simulates the \emph{range} type of JAMS-0.1, but taking \emph{duration}$=0$ recovers the \emph{event}
 type as well, with a small amount of redundancy.
 
-The \emph{time series} type of JAMS1 can be viewed as an efficiently coded, dense sequence of \emph{range} observations with implicit
+The \emph{time series} type of JAMS-0.1 can be viewed as an efficiently coded, dense sequence of \emph{range} observations with implicit
 durations.
-Recall that in JAMS1, each \emph{Annotation} object contains a list of observations in its \emph{data} field.
+Recall that in JAMS-0.1, each \emph{Annotation} object contains a list of observations in its \emph{data} field.
 For high-frequency observations --- such as melodic contours, sampled at 10Hz or greater --- encoding a 4-tuple for each
 sample would be inefficient, due to redundantly listing the keys \emph{time, value, duration, confidence}.
-JAMS2 circumvents this by allowing a distinction between \emph{sparse} and \emph{dense} observation lists.
+JAMS-0.2 circumvents this by allowing a distinction between \emph{sparse} and \emph{dense} observation lists.
 Note that having standardized the observation format, the \emph{Annotation}'s data field can be interpreted as an $n\times 4$ table, which
 may be encoded in either a row-major (\emph{sparse}) or column-major (\emph{dense}) format.
-While the column-major format is generally more spatially efficient, the row-major format is more legible, 
-and generally preferable for most tasks.
+While the column-major format is generally more spatially efficient, the row-major format is more human-legible, 
+and for most tasks, the difference in efficiency is negligible.
 
 Standardizing the observation format both simplifies upstream code to interact with JAMS objects, and generalizes the previous
-definitions. (For instance, time series now have explicit durations/sampling rates, and gaps are permitted.)
+definitions. (For instance, time series now have explicit durations/sampling rates, and gaps in observations are now permitted.)
 The one thing that we lose in this process is the notion of time-independent annotations, such as \emph{tag}, \emph{genre}, and \emph{mood} 
-in JAMS1.
-This is because all observations in JAMS2 are required to have a time and (potentially 0) duration.
-However, we argue that this is an advantage for three reasons.  First, it is possible to have full-track observations by setting
-\emph{time}$=0$ and $\emph{duration}$ to the full track duration.  Second, in reality, every observation type may vary over time, so the
-schema should support this.  Finally, it forces the annotator to be explicit about the valid timing of an observation, and facilitates
-partial annotation (see \cref{sec:future}).
+in JAMS-0.1.
+This is because all observations in JAMS-0.2 are required to have a time and (potentially 0) duration.
+However, we argue that this is an advantage for three reasons.
+First, it is possible to have full-track observations by setting \emph{time}$=0$ and $\emph{duration}$ to the full track duration, so no functionality is lost.
+Second, in reality, every observation type may vary over time, so the schema should support this explicitly.
+Finally, it forces the annotator to be explicit about the valid timing of an observation, and facilitates partial annotation (see \cref{sec:future}).
 
-\subsection{Tasks and namespaces}\label{sec:schema:task}
+\subsection{Task- vs. Annotation-major layout}\label{sec:schema:task}
 
-As illustrated in Figure~\cref{jams1}, JAMS1 took a \emph{task-major} approach to structuring annotations.  A collection of supported tasks was
-defined within the JAMS1 schema, such as \emph{tag}, \emph{genre}, \emph{chord}, \emph{key}, \emph{melody}, \emph{etc}.  Annotations of a
+As illustrated in Figure~\cref{jams1}, JAMS-0.1 took a \emph{task-major} approach to structuring annotations.  A collection of supported tasks was
+defined within the JAMS-0.1 schema, such as \emph{tag}, \emph{genre}, \emph{chord}, \emph{key}, \emph{melody}, \emph{etc}.  Annotations of a
 particular task would then be accessed by indexing the array of annotations corresponding to that task, \emph{e.g.}:
 \begin{lstlisting}[language=json]
   jams_object.beat[0]
@@ -202,39 +216,49 @@ As a simple example, take the case of \emph{tags}.
 Different data sets are annotated using different vocabularies, which may be closed
 (\emph{e.g.}, GTZAN or CAL500) or open (\emph{e.g.}, last.fm).
 This implies that the validity of a tag annotation depends upon the target vocabulary, which is not explicitly coded within the schema.
-(Indeed, an exhaustive coding of tag vocabularies within a fixed schema is impossible.) 
+(Indeed, an exhaustive coding of \emph{all} tag vocabularies within a fixed schema is impossible.) 
 As a more nuanced example, \emph{chord} annotations can be drawn from different vocabularies (\emph{e.g.}, including or suppressing extensions),
 or even radically different annotation styles, such as the pop-style annotations of Isophonics compared to the roman numeral annotations of the
 Rock corpus.
 In these cases, it is hardly sensible to group these variations together under a single task, since their annotations are not directly
 comparable.
 
-JAMS2 resolves these issues by adopting an an\-notation-major (rather than task-major) structure, and introducing the \emph{namespace}
-abstraction.
-
-Instead of grouping annotations by task at the top-level, a JAMS2 object contains a single list of \emph{Annotations}.
+To resolve these issues, JAMS-0.2 adopts an an\-notation-major (rather than task-major) structure.
+Instead of grouping annotations by task at the top-level, a JAMS-0.2 object contains a single list of \emph{Annotations}.
 This allows for the same core schema to be retained as new tasks are introduced, since there is no explicit dependence on the task
 definitions.
+However, since all annotations are collected in a single, anonymous data structure, we will need a new way to distinguish between annotations for different tasks.
+This leads us to the task \emph{namespace} abstraction.
 
-Each annotation object declares its task through the \emph{namespace} field.
-A \emph{namespace} in JAMS2 is simply a partial schema declaration which defines the following properties:
+\subsection{Task namespaces}\label{sec:schema:namespace}
+Each annotation object declares its task through a string-valued field called \emph{namespace}.
+A \emph{namespace} in JAMS-0.2 is simply a partial schema declaration which defines the following properties:
 \begin{itemize}
     \item an identifier, \emph{e.g.}, ``beat'' or ``tag\_cal500'';
     \item schema declarations for the \emph{value} and \emph{confidence} fields;
-    \item whether data should be encoded in \emph{dense} or \emph{sparse} form.
+    \item whether data should be encoded in \emph{dense} or \emph{sparse} form; and
+    \item a brief plain-text description of the task.
 \end{itemize}
 The identifier is within \emph{Annotation} objects to specify which namespace they should be validated against.
 The schema declarations for \emph{value} and \emph{confidence} are both optional, but can be used to impose constraints on the permissible
 contents of an observation. 
+
 This abstraction allows for both a more general set of supported tasks, in that there may be many \emph{tag} namespaces, 
 and more precise task definitions for each specific namespace.
 For instance, a valid \emph{tag\_cal500} annotation must have a value drawn from the correct vocabulary, whereas a \emph{tag\_open}
 annotation may contain any string in its \emph{value} field; however, in both cases, the value must be a string, and this constraint was
-not possible in the JAMS1 schema.
+not possible in the JAMS-0.1 schema.
+
+With the namespace abstraction, it is possible for observations to have arbitrarily structured value and confidence fields.
+\Cref{fig:thayer} provides a complete example namespace definition for \emph{mood\_thayer} annotations, in which each observed value is an ordered pair of numbers encoding \emph{valence}
+and \emph{arousal} in the Thayer mood model.
 
 For convenience, namespaces are grouped into high-level task categories by their identifiers.
 We stress that this grouping is merely cosmetic, and there is no strict underlying hierarchy of tasks.
 \Cref{tab:namespaces} lists the namespaces supported in JAMS v0.2.0.
+
+Finally, namespaces are defined externally to the core schema, and new namespaces can be imported dynamically with no modifications to the JAMS implementation itself.
+This makes it possible to develop and share custom annotation specifications.
 
 \begin{table}
     \caption{Namespaces supported in JAMS v0.2.0.}\label{tab:namespaces}
@@ -270,6 +294,24 @@ We stress that this grouping is merely cosmetic, and there is no strict underlyi
     \bottomrule
     \end{tabular}
 \end{table}
+
+\begin{figure}
+    \begin{lstlisting}[language=json,title={mood\_thayer.json}]
+{"mood_thayer":
+    {
+        "value": {
+            "type": "array",
+            "items": {"type": "number"},
+            "minItems": 2,
+            "maxItems": 2
+        },
+        "dense": false,
+        "description": "Time-varying emotional measurements as ordered pairs of (valence, arousal)"
+    }
+}
+\end{lstlisting}
+\caption{An example namespace definition file for \emph{mood\_thayer}.\label{fig:thayer}}
+\end{figure}
 
 \section{Implementation}\label{sec:implementation}
 
