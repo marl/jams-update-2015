@@ -295,6 +295,21 @@ This makes it possible to develop and share custom annotation specifications.
     \end{tabular}
 \end{table}
 
+\begin{table}
+    \caption{New namespaces planned for JAMS v0.2.1.}\label{tab:namespaces:0.2.1}
+    \centering
+    \begin{tabular}{rl}
+    \toprule
+    Task group                  & Namespace\\
+    \midrule
+    \multirow{2}{*}{Misc}       & \texttt{blob}\\
+                                & \texttt{vector}\\
+    Segment                     & \texttt{multi\_segment}\\
+    \bottomrule
+    \end{tabular}
+\end{table}
+
+
 \begin{figure}
     \begin{lstlisting}[language=json,title={mood\_thayer.json}]
 {"mood_thayer":
@@ -310,14 +325,56 @@ This makes it possible to develop and share custom annotation specifications.
     }
 }
 \end{lstlisting}
-\caption{An example namespace definition file for \emph{mood\_thayer}.\label{fig:thayer}}
+\caption{An example namespace definition file for \emph{mood\_thayer}.  Each observed
+value is an array of exactly two numbers, and observations are packed sparsely.  No
+constraints are placed upon the \emph{confidence} field.\label{fig:thayer}}
 \end{figure}
+
 
 \section{Implementation}\label{sec:implementation}
 
-\subsection{Dynamic namespaces}\label{sec:imp:namespaces}
+To support the schema changes described in the previous section, the JAMS python 
+implementation was dramatically revised in 0.2.
+
 \subsection{Search}\label{sec:imp:search}
+As described in \ref{sec:schema:namespace}, all annotation objects are now collected in a
+single list at the top level.  This presents a difficulty for users: in the presence of
+multiple annotations spanning various tasks, how can one efficiently select a specific
+annotation?  A common use-case might be selecting only the annotations matching a given
+task, \emph{e.g.}, finding all the \texttt{beat} annotations.  More advanced and general
+examples are also possible, such as filtering by annotator or curator, or arbitrary
+sandbox entries.
+
+To address this general, common problem, we introduced the \texttt{JAMS.search()} method.
+This method acts as a filter over the list of annotations, and performs a recursive
+descent over the object hierarchy to find matching fields.  For example, to find all the
+\texttt{beat} annotations, one simply needs to execute the following:
+\begin{lstlisting}[language=Python]
+>>> jam = jams.load('filename.jams')
+>>> anns = jam.search(namespace='beat')
+\end{lstlisting}
+The resulting \texttt{anns} object is a (possibly empty) collection of annotation objects
+matching the query.  Multiple simultaneous query conditions are possible, and are 
+interpreted disjunctively.
+The following example finds all annotations that have either
+\texttt{beat} as a namespace, or \emph{isophonics} as a corpus:
+\begin{lstlisting}[language=Python]
+>>> anns = jam.search(namespace='beat',
+...                   corpus='isophonics')
+\end{lstlisting}
+
+In fact, search results are provided as a list-like object that again implements 
+\texttt{search()}, so that conjunctions are supported by successive queries.
+To find annotations that match both the namespace and corpus fields, one could execute 
+the following:
+\begin{lstlisting}[language=Python]
+>>> anns = jam.search(namespace='beat')
+>>> anns = anns.search(corpus='isophonics')
+\end{lstlisting}
+
 \subsection{Data frames}\label{sec:imp:dataframe}
+
+\subsection{Dynamic namespaces}\label{sec:imp:namespaces}
 \subsection{Validation}\label{sec:imp:validation}
 \subsection{mir\_eval integration}\label{sec:imp:mireval}
 \subsection{IO, compression, JAMZ}\label{sec:imp:compression}
