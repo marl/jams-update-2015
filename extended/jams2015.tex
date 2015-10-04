@@ -420,7 +420,7 @@ Accessing individual observations in JAMS2 looks nearly identical to JAMS1
 >>> all_beats = ann.data.time
 \end{lstlisting}
 However, the \texttt{ann.data} object itself can now be operated upon as an array or
-data frame.
+data frame.exchange
 
 JAMS data frame objects interpret all \texttt{time} and \texttt{duration} fields as
 \texttt{timedelta} types.  In addition to facilitating semantic validation ---
@@ -431,6 +431,26 @@ point representations in units of seconds.
 
 
 \subsection{Dynamic namespaces}\label{sec:imp:namespaces}
+As described in \cref{sec:schema}, JAMS-0.2 adopts an extensible task framework.
+In the Python implementation, this is supported by dynamic construction of the full
+schema at run-time.
+Each namespace is defined in a self-contained file (\emph{e.g.}, \cref{fig:thayer}), and
+when the JAMS library is imported, it searches for all namespace definitions within the
+distribution, adding each to a dictionary of available namespaces.
+
+This dynamic namespace implementation carries two benefits.  First, it decouples the
+namespace definitions from the core schema, allowing namespaces to evolve over
+time without changing the core structure.  Second, it allows practitioners to define and
+import namespaces for their own tasks without modifying the JAMS library.  Consequently,
+this should ameliorate the need to fork and modify the JAMS implementation, thus
+preventing fragmentation.
+
+New namespaces can be added at runtime by the following code fragment:
+\begin{lstlisting}[language=python]
+>>> import jams
+>>> jams.schema.add_namespace('/path/to/my_namespace.json')
+\end{lstlisting}
+
 \subsection{Validation}\label{sec:imp:validation}
 \subsection{mir\_eval integration}\label{sec:imp:mireval}
 \subsection{IO, compression, JAMZ}\label{sec:imp:compression}
