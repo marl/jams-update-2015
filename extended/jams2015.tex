@@ -298,20 +298,6 @@ This makes it possible to develop and share custom annotation specifications.
     \end{tabular}
 \end{table}
 
-\begin{table}
-    \caption{New namespaces planned for JAMS v0.2.1.}\label{tab:namespaces:0.2.1}
-    \centering
-    \begin{tabular}{rl}
-    \toprule
-    Task group                  & Namespace\\
-    \midrule
-    \multirow{2}{*}{Misc}       & \texttt{blob}\\
-                                & \texttt{vector}\\
-    Segment                     & \texttt{multi\_segment}\\
-    \bottomrule
-    \end{tabular}
-\end{table}
-
 
 \begin{figure}
     \begin{lstlisting}[language=json,title={mood\_thayer.json}]
@@ -540,11 +526,87 @@ The compressed JAMS format can significantly increase storage efficiency at the 
 direct human legibility.  In many situations, this trade-off is acceptable.
 
 \section{Future directions}\label{sec:future}
+In this section, we describe the current work in progress and speculative features to
+come in future revisions.
 
 \subsection{Namespace conversions}
+As shown in \cref{tab:namespaces}, many of the existing namespaces are similar enough to
+share common representations and evaluation schemes, and can therefore be grouped into
+high-level categories.
+In some cases, it is even possible to construct explicit mappings between namespaces.
+This can be useful for simultaneously modeling or comparing data from different corpora.
+
+As concrete examples, \texttt{chord\_harte} is a strict subset of \texttt{chord}, and
+\texttt{tag\_cal500} is a strict subset of \texttt{tag\_open}.  In these cases, the mapping
+is a trivial substitution of the \emph{namespace} identifier in the annotation.  A less
+trivial example can be found in the mapping between \texttt{pitch\_hz} and
+\texttt{pitch\_midi}, where the values must undergo a unit conversion.
+Finally, one may wish to convert a \texttt{chord\_roman} annotation 
+to \texttt{chord} format, which requires a substantial (and non-invertible) 
+manipulation of the data.
+
+Although complicated, implementing automatic namespace conversion --- even if it is
+occasionally non-invertible --- would be valuable for simplifying modeling and
+evaluation of tasks across different datasets.
+
+
 \subsection{Local namespaces and unstructured data}
+JAMS-0.2 provides functionality for local extensions of the supported namespaces, but it
+can be tedious to add namespace definitions manually in each application.  We therefore
+plan to introduce functionality to support a \emph{local} namespace repository, in
+addition to the definitions which ship in the main distribution.  This repository would
+be specified by an environment variable or configuration file, and reduce the amount of
+custom code needed to support local extensions to the namespaces.
+
+In addition to expanded support for local modification, we plan to introduce three new
+namespaces in 0.2.1 as listed in \cref{tab:namespaces:0.2.1}.
+
+The \texttt{multi\_segment} namespace is similar to existing the \texttt{segment} 
+namespaces, except that it introduces an additional \emph{level} field to the values
+which can be used to encode a multi-layer or hierarchical segmentations.
+
+The \texttt{vector} namespace provides values which are arbitrary arrays of numbers.
+This can be useful for regression problems in which the annotation targets are
+vector-valued, such as collaborative filter prediction, or higher-dimensional 
+extensions of the Thayer mood model.  The \texttt{vector} namespace does not enforce that
+each observation's array is of the same length, so great care must be taken in
+documenting annotations using this namespace.
+
+The \texttt{blob} namespace can be used to store arbitrarily structured values which
+don't otherwise fit in an existing schema.  This namespace should be viewed as a last
+resort to storing within JAMS.  Whenever possible, we recommend using the most specific
+namespace that characterizes the annotations of interest.
+
+\begin{table}
+    \caption{New namespaces planned for JAMS v0.2.1.}\label{tab:namespaces:0.2.1}
+    \centering
+    \begin{tabular}{rl}
+    \toprule
+    Task group                  & Namespace\\
+    \midrule
+    \multirow{2}{*}{Misc}       & \texttt{blob}\\
+                                & \texttt{vector}\\
+    Segment                     & \texttt{multi\_segment}\\
+    \bottomrule
+    \end{tabular}
+\end{table}
+
+
 \subsection{Partial annotations}
+For a variety of practical reasons, annotations frequently do not span the entire
+duration of a track.  Ideally, annotations should therefore define the time extent over
+which the annotation is valid.  While JAMS-0.2 provided some functionality to encode this
+(via the \emph{duration} fields or a sandbox entry) it was not standardized, and no
+provision exists to support partial annotations of zero-duration events.
+
+Starting in JAMS-0.2.1, each annotation object will also contain optional \texttt{time} and
+\texttt{duration} field.  By convention, if these fields are left null, then the
+annotation should be assumed to span the entire track.
+
+
 \subsection{Quick-view}
+
+
 
 \bibliography{refs}
 
