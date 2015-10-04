@@ -371,8 +371,8 @@ In fact, search results are provided as a list-like object that again implements
 To find annotations that match both the namespace and corpus fields, one could execute 
 the following:
 \begin{lstlisting}[language=python]
->>> anns = jam.search(namespace='beat')
->>> anns = anns.search(corpus='isophonics')
+>>> anns = jam.search(namespace='beat')\
+...           .search(corpus='isophonics')
 \end{lstlisting}
 
 
@@ -488,8 +488,35 @@ fragment:
 ...                 validate=False)
 \end{lstlisting}
 
+
 \subsection{mir\_eval integration}\label{sec:imp:mireval}
-\subsection{IO, compression, JAMZ}\label{sec:imp:compression}
+The \texttt{mir\_eval} package provides reference implementations of common evaluation
+metrics for various tasks.
+Because \texttt{mir\_eval} uses a variety of (well-defined) flat annotation formats for
+its input, JAMS-0.2 provides bindings which translate JAMS annotations into
+\texttt{mir\_eval}-format, call the appropriate evaluation routine, and return the
+resulting dictionary of scores.
+
+The evaluation bindings are contained in the \texttt{eval} submodule, which provides
+a simple, consistent interface to evaluators, \emph{e.g.}:
+\begin{lstlisting}[language=python]
+# Get the first beat annotation from the
+# reference and estimation objects
+>>> ann_r = ref.search(namespace='beat')[0]
+>>> ann_e = est.search(namespace='beat')[0]
+
+# Call the evaluator
+>>> scores = jams.eval.beat(ann_r, ann_e)
+\end{lstlisting}
+All evaluation bindings accept two annotations (reference and estimate), and additional
+keyword arguments which can be passed through to configure the evaluator.
+Each evaluation binding also verifies that the input annotations belong to the 
+correct namespace(s) and pass validation.
+
+
+\subsection{Serialization IO}\label{sec:imp:compression}
+
+
 
 \section{Future directions}\label{sec:future}
 
