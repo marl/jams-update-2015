@@ -241,7 +241,10 @@ A \emph{namespace} in JAMS-0.2 is simply a partial schema declaration which defi
 \end{itemize}
 The identifier is within \emph{Annotation} objects to specify which namespace they should be validated against.
 The schema declarations for \emph{value} and \emph{confidence} are both optional, but can be used to impose constraints on the permissible
-contents of an observation. 
+contents of an observation.\footnote{The term \emph{namespace} was chosen to connote that
+the \texttt{value} and \emph{confidence} fields keep the same \emph{name} in different
+tasks, but their interpretation varies according to \emph{namespace}.  This is analogous
+to the notion of namespace encapsulations in software engineering.}
 
 This abstraction allows for both a more general set of supported tasks, in that there may be many \emph{tag} namespaces, 
 and more precise task definitions for each specific namespace.
@@ -443,15 +446,48 @@ namespace definitions from the core schema, allowing namespaces to evolve over
 time without changing the core structure.  Second, it allows practitioners to define and
 import namespaces for their own tasks without modifying the JAMS library.  Consequently,
 this should ameliorate the need to fork and modify the JAMS implementation, thus
-preventing fragmentation.
+preventing fragmentation of the codebase.
 
 New namespaces can be added at runtime by the following code fragment:
 \begin{lstlisting}[language=python]
 >>> import jams
->>> jams.schema.add_namespace('/path/to/my_namespace.json')
+>>> jams.schema.add_namespace(
+...     '/path/to/my_namespace.json')
 \end{lstlisting}
 
+
 \subsection{Validation}\label{sec:imp:validation}
+The JAMS-0.2 namespace framework also facilitates task-dependent data validation via 
+JSON schema.
+This helps ensure that annotations are not only \emph{syntactically} correct, but (at
+least partially) \emph{semantically} correct.
+Whenever a JAMS object is serialized or deserialized, it is run through a schema
+validation which ensures that the data is well-formed, and each observation fits the
+specification of its containing namespace.  We note that this was not possible in
+JAMS-0.1 because the relatively coarse observation types (\emph{e.g.}, \texttt{tag}) were
+too broad to support precise specification of allowable values.
+
+Validation errors in JAMS-0.2 can be handled in either \emph{strict} or \emph{non-strict}
+mode.  In strict mode, errors invoke an exception and interrupt the program.  In
+non-strict mode, errors simply issue a warning and do not interrupt the program.
+Finally, because validation can be a relatively expensive operation, it can be bypassed
+entirely on load if the practitioner is confident that the data has already been
+validated.  These different validation modes are exemplified by the following code
+fragment:
+
+\begin{lstlisting}[language=python]
+# With strict validation (default)
+>>> jam = jams.load('file.jams')
+
+# With lax validation
+>>> jam = jams.load('file.jams',
+...                 strict=False)
+
+# With no validation
+>>> jam = jams.load('file.jams',
+...                 validate=False)
+\end{lstlisting}
+
 \subsection{mir\_eval integration}\label{sec:imp:mireval}
 \subsection{IO, compression, JAMZ}\label{sec:imp:compression}
 
