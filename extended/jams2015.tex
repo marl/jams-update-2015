@@ -22,7 +22,7 @@
 
 \lstdefinelanguage{json}{
     basicstyle=\normalfont\ttfamily,
-    numbers=left,
+    numbers=none,
     numberstyle=\scriptsize,
     stepnumber=1,
     numbersep=8pt,
@@ -49,8 +49,8 @@
       {]}{{{\color{delim}{]}}}}{1},
 }
 
-\lstset{language=python,frame=none}
-\lstset{language=json,frame=lines}
+\lstset{language=python,frame=none,numbers=none}
+\lstset{language=json,frame=lines,numbers=none}
 
 \renewcommand\Authfont{\bfseries}
 
@@ -349,7 +349,7 @@ To address this general, common problem, we introduced the \texttt{JAMS.search()
 This method acts as a filter over the list of annotations, and performs a recursive
 descent over the object hierarchy to find matching fields.  For example, to find all the
 \texttt{beat} annotations, one simply needs to execute the following:
-\begin{lstlisting}[language=Python]
+\begin{lstlisting}[language=python]
 >>> jam = jams.load('filename.jams')
 >>> anns = jam.search(namespace='beat')
 \end{lstlisting}
@@ -358,7 +358,7 @@ matching the query.  Multiple simultaneous query conditions are possible, and ar
 interpreted disjunctively.
 The following example finds all annotations that have either
 \texttt{beat} as a namespace, or \emph{isophonics} as a corpus:
-\begin{lstlisting}[language=Python]
+\begin{lstlisting}[language=python]
 >>> anns = jam.search(namespace='beat',
 ...                   corpus='isophonics')
 \end{lstlisting}
@@ -367,12 +367,68 @@ In fact, search results are provided as a list-like object that again implements
 \texttt{search()}, so that conjunctions are supported by successive queries.
 To find annotations that match both the namespace and corpus fields, one could execute 
 the following:
-\begin{lstlisting}[language=Python]
+\begin{lstlisting}[language=python]
 >>> anns = jam.search(namespace='beat')
 >>> anns = anns.search(corpus='isophonics')
 \end{lstlisting}
 
+
 \subsection{Data frames}\label{sec:imp:dataframe}
+The JAMS1 implementation provided a direct object mapping between the JSON representation
+and its instantiation in Python.
+Consequently, the code to access the elementa of a JAMS object is a simple traversal of the
+data structure, \emph{e.g.}:
+\begin{lstlisting}[language=python]
+>>> ann = jam.beat[0]
+>>> first_beat = ann.data[0].time
+\end{lstlisting}
+One advantage of this approach is that it would yield nearly identical code in any other
+language (such as JavaScript)
+
+However, in practice, working with data in this format can be somewhat cumbersome.
+For example, evaluation scripts (such as mir\_eval~\cite{raffel2014}) typically expect
+data in an array format.  This can be accomplished with some minor contortion by
+iterating over the observations:
+\begin{lstlisting}[language=python]
+>>> all_beats = [o.time for o in ann.data]
+\end{lstlisting}
+More generally, certain common operations like thresholding or
+label manipulation are simply easier with natively array-oriented representations.
+
+Since JAMS2 encodes all annotation data in a table-friendly format, we instead opted to
+provide a table-interface in the Python implementation.  This is accomplished by
+translating annotation data fields into a Pandas data frame
+object~\cite{mckinney-proc-scipy-2010} upon construction.
+The choice of using a data frame (rather than a numpy array) carries several advantages:
+\begin{itemize}
+    \item labeled fields;
+    \item heterogeneous data types;
+    \item advanced query operations (join, merge, etc);
+    \item missing value support; and
+    \item temporal indexing.
+\end{itemize}
+
+Accessing individual observations in JAMS2 looks nearly identical to JAMS1
+(once an annotation object has been selected):
+\begin{lstlisting}[language=python]
+>>> ann = jam.search(namespace='beat')[0]
+>>> first_beat = ann.data.time[0]
+
+# This would also work:
+>>> first_beat = ann.data.loc[0].time
+
+>>> all_beats = ann.data.time
+\end{lstlisting}
+However, the \texttt{ann.data} object itself can now be operated upon as an array or
+data frame.
+
+JAMS data frame objects interpret all \texttt{time} and \texttt{duration} fields as
+\texttt{timedelta} types.  In addition to facilitating semantic validation ---
+\texttt{time} and \texttt{duration} fields are enforced to contain non-negative values --- 
+this enables pandas to efficiently align and resample multiple annotations with 
+non-uniform timings.  Upon serialization, these values are converted back to raw floating
+point representations in units of seconds.
+
 
 \subsection{Dynamic namespaces}\label{sec:imp:namespaces}
 \subsection{Validation}\label{sec:imp:validation}
