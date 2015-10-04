@@ -516,7 +516,28 @@ correct namespace(s) and pass validation.
 
 \subsection{Serialization IO}\label{sec:imp:compression}
 
+JAMS-0.1 was developed for serializing data to disk and back, and thus assumed that all
+serialization targets were filenames.  JAMS-0.2 relaxes this assumption, and allows
+serialization to open file-like python objects as well.  This is done transparently by
+simply passing a file-like object to the input-output routines instead of a filename:
+\begin{lstlisting}[language=python]
+>>> with open('input.jams') as fd:
+        jam = jams.load(fd)
+\end{lstlisting}
+This functionality can be useful in the context of a web server, where 
+the destination is not a file on disk but an open HTTP connection to a browser.
 
+Moreover, the JAMS IO routines now support compressed file targets by specifying the
+\texttt{.jamz} (\emph{i.e.}, JAMs~Zipped) extension to the file name:
+\begin{lstlisting}[language=python]
+>>> jam = jams.load('input.jamz')
+
+# This would also work
+>>> jam = jams.load('input.jams.gz',
+...                 fmt='jamz')
+\end{lstlisting}
+The compressed JAMS format can significantly increase storage efficiency at the cost of
+direct human legibility.  In many situations, this trade-off is acceptable.
 
 \section{Future directions}\label{sec:future}
 
