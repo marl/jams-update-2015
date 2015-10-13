@@ -20,12 +20,6 @@
           "value": 1.0,
           "confidence": 1.0
         },
-        {
-          "time": 1.904,
-          "duration": 0.0,
-          "value": 2.0,
-          "confidence": 1.0
-        },
         ...
       ]
     },

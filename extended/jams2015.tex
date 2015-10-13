@@ -21,7 +21,7 @@
 \colorlet{numb}{magenta!60!black}
 
 \lstdefinelanguage{json}{
-    basicstyle=\normalfont\ttfamily,
+    basicstyle=\normalfont\ttfamily\scriptsize,
     numbers=none,
     numberstyle=\scriptsize,
     stepnumber=1,
@@ -147,6 +147,7 @@ specification will be referred to as \emph{JAMS-0.2}.
 \section{JAMS specification}\label{sec:schema}
 In this section, we highlight the changes to the JAMS schema definition(s).
 Since these changes apply to the file structure definition itself, they are independent of the software implementation used to parse or generate JAMS files.
+The software implementation of JAMS is available at \url{https://github.com/marl/jams}.
 
 
 \subsection{Unified observation types}\label{sec:schema:annotations}
@@ -217,7 +218,7 @@ Finally, it forces the annotator to be explicit about the valid timing of an obs
 
 As illustrated in \cref{jams1}, JAMS-0.1 took a \emph{task-major} approach to structuring annotations.  A collection of supported tasks was
 defined within the JAMS-0.1 schema, such as \emph{tag}, \emph{genre}, \emph{chord}, \emph{key}, \emph{melody}, \emph{etc}.  Annotations of a
-particular task would then be accessed by indexing the array of annotations corresponding to that task, \emph{e.g.}:
+particular task would then be accessed by indexing the array of annotations corresponding to that task, \emph{e.g.}:\\
 \begin{lstlisting}[language=json]
   jams_object.beat[0]
 \end{lstlisting}
@@ -230,13 +231,13 @@ This is clearly undesirable, as it could lead to fragmentation of the JAMS speci
 Second, it provides no means of distinguishing between different variations of a task.
 As a simple example, take the case of \emph{tags}.
 Different data sets are annotated using different vocabularies, which may be closed
-(\emph{e.g.}, GTZAN or CAL500) or open (\emph{e.g.}, last.fm).
+(\emph{e.g.}, GTZAN~\cite{gtzan} or CAL500~\cite{cal500}) or open (\emph{e.g.}, last.fm).
 This implies that the validity of a tag annotation depends upon the target vocabulary, which is not explicitly coded within the schema.
 (Indeed, an exhaustive coding of \emph{all} tag vocabularies within a fixed schema is impossible.) 
 As a more nuanced example, \emph{chord} annotations can be drawn from different vocabularies (\emph{e.g.}, including or suppressing extensions),
 or even radically different annotation styles, such as the pop-style annotations of
 Isophonics~\cite{isophonicsbeatles} compared to the roman numeral annotations of the
-Rock corpus~\cite{de2011corpus}.
+Rock Corpus~\cite{de2011corpus}.
 In these cases, it is hardly sensible to group these variations together under a single task, since their annotations are not directly
 comparable.
 
@@ -260,7 +261,7 @@ A \emph{namespace} in JAMS-0.2 is simply a partial schema declaration which defi
     \item whether data should be encoded in \emph{dense} or \emph{sparse} form; and
     \item a brief plain-text description of the task.
 \end{itemize}
-The identifier is within \emph{Annotation} objects to specify which namespace they should be validated against.
+The identifier is included within \emph{Annotation} objects to specify which namespace they should be validated against.
 The schema declarations for \emph{value} and \emph{confidence} are both optional, but can be used to impose constraints on the permissible
 contents of an observation.\footnote{The term \emph{namespace} was chosen to connote that
 the \texttt{value} and \emph{confidence} fields keep the same \emph{name} in different
@@ -275,25 +276,26 @@ not possible in the JAMS-0.1 schema.
 
 With the namespace abstraction, it is possible for observations to have arbitrarily structured value and confidence fields.
 \Cref{fig:thayer} provides a complete example namespace definition for \emph{mood\_thayer} annotations, in which each observed value is an ordered pair of numbers encoding \emph{valence}
-and \emph{arousal} in the Thayer mood model.
+and \emph{arousal} in the Thayer mood model~\cite{thayer}.
 
 For convenience, namespaces are grouped into high-level task categories by their identifiers.
 We stress that this grouping is merely cosmetic, and there is no strict underlying hierarchy of tasks.
-\Cref{tab:namespaces} lists the namespaces supported in JAMS v0.2.0.
+\Cref{tab:namespaces} lists the namespaces supported in JAMS v0.2.
 
 Finally, namespaces are defined externally to the core schema, and new namespaces can be imported dynamically with no modifications to the JAMS implementation itself.
 This makes it possible to develop and share custom annotation specifications.
 
 \begin{table}
-    \caption{Namespaces supported in JAMS v0.2.0.}\label{tab:namespaces}
+    \caption{Namespaces supported in JAMS v0.2.}\label{tab:namespaces}
     \centering
     \begin{tabular}{rl}
     \toprule
     Task group                  & Namespace\\
     \midrule
-    \multirow{2}{*}{Beat}       & \texttt{beat}\\
+    Beat       & \texttt{beat}\\
                                 & \texttt{beat\_position}\\
-    \multirow{3}{*}{Chord}      & \texttt{chord}\\
+
+    Chord      & \texttt{chord}\\
                                 & \texttt{chord\_harte}\\
                                 & \texttt{chord\_roman}\\
     Key                         & \texttt{key\_mode }\\
@@ -301,15 +303,15 @@ This makes it possible to develop and share custom annotation specifications.
     Mood                        & \texttt{mood\_thayer}\\
     Onset                       & \texttt{onset}\\
     Pattern                     & \texttt{pattern\_jku}\\
-    \multirow{3}{*}{Pitch}      & \texttt{pitch\_class}\\
+    Pitch      & \texttt{pitch\_class}\\
                                 & \texttt{pitch\_hz}\\
                                 & \texttt{pitch\_midi}\\
-    \multirow{5}{*}{Segment}    & \texttt{segment\_open}\\
+    Segment    & \texttt{segment\_open}\\
                                 & \texttt{segment\_salami\_function}\\
                                 & \texttt{segment\_salami\_upper}\\
                                 & \texttt{segment\_salami\_lower}\\
                                 & \texttt{segment\_salami\_tut}\\
-    \multirow{5}{*}{Tag}        & \texttt{tag\_cal10k}\\
+    Tag        & \texttt{tag\_cal10k}\\
                                 & \texttt{tag\_cal500}\\
                                 & \texttt{tag\_gtzan}\\
                                 & \texttt{tag\_medleydb\_instruments}\\
@@ -351,11 +353,11 @@ As described in \ref{sec:schema:namespace}, all annotation objects are now colle
 single list at the top level.  This presents a difficulty for users: in the presence of
 multiple annotations spanning various tasks, how can one efficiently select a specific
 annotation?  A common use-case might be selecting only the annotations matching a given
-task, \emph{e.g.}, finding all the \texttt{beat} annotations.  More advanced and general
-examples are also possible, such as filtering by annotator or curator, or arbitrary
+task, \emph{e.g.}, finding all \texttt{beat} annotations.  More advanced
+examples are also possible, such as filtering by annotator, curator, or arbitrary
 sandbox entries.
 
-To address this general, common problem, we introduced the \texttt{JAMS.search()} method.
+\sloppy{To address this problem, we introduced the \texttt{JAMS.search()} method.}
 This method acts as a filter over the list of annotations, and performs a recursive
 descent over the object hierarchy to find matching fields.  For example, to find all the
 \texttt{beat} annotations, one simply needs to execute the following:
@@ -384,7 +386,7 @@ the following:
 
 
 \subsection{Data frames}\label{sec:imp:dataframe}
-The JAMS1 implementation provided a direct object mapping between the JSON representation
+The JAMS-0.1 implementation provided a direct object mapping between the JSON representation
 and its instantiation in Python.
 Consequently, the code to access the elements of a JAMS object is a simple traversal of the
 data structure, \emph{e.g.}:
@@ -396,7 +398,7 @@ One advantage of this approach is that it would yield nearly identical code in a
 language (such as JavaScript)
 
 However, in practice, working with data in this format can be somewhat cumbersome.
-For example, evaluation scripts (such as mir\_eval~\cite{raffel2014}) typically expect
+For example, evaluation scripts (such as \texttt{mir\_eval}~\cite{raffel2014}) typically expect
 data in an array format.  This can be accomplished with some minor contortion by
 iterating over the observations:
 \begin{lstlisting}[language=python]
@@ -405,7 +407,7 @@ iterating over the observations:
 More generally, certain common operations like thresholding or
 label manipulation are simply easier with natively array-oriented representations.
 
-Since JAMS2 encodes all annotation data in a table-friendly format, we instead opted to
+Since JAMS-0.2 encodes all annotation data in a table-friendly format, we instead opted to
 provide a table-interface in the Python implementation.  This is accomplished by
 translating annotation data fields into a Pandas data frame
 object~\cite{mckinney-proc-scipy-2010} upon construction.
@@ -419,7 +421,7 @@ The choice of using a data frame (rather than a numpy array) carries several adv
     \item temporal indexing.
 \end{itemize}
 
-Accessing individual observations in JAMS2 looks nearly identical to JAMS1
+Accessing individual observations in JAMS-0.2 looks nearly identical to JAMS-0.1
 (once an annotation object has been selected):
 \begin{lstlisting}[language=python]
 >>> ann = jam.search(namespace='beat')[0]
@@ -436,7 +438,7 @@ data frame.
 JAMS data frame objects interpret all \texttt{time} and \texttt{duration} fields as
 \texttt{timedelta} types.  In addition to facilitating semantic validation ---
 \texttt{time} and \texttt{duration} fields are enforced to contain non-negative values --- 
-this enables pandas to efficiently align and resample multiple annotations with 
+this enables Pandas to efficiently align and resample multiple annotations with 
 non-uniform timings.  Upon serialization, these values are converted back to raw floating
 point representations in units of seconds.
 
@@ -606,7 +608,7 @@ namespace that characterizes the annotations of interest.
     \toprule
     Task group                  & Namespace\\
     \midrule
-    \multirow{2}{*}{Misc}       & \texttt{blob}\\
+    Misc       & \texttt{blob}\\
                                 & \texttt{vector}\\
     Segment                     & \texttt{multi\_segment}\\
     \bottomrule
@@ -624,7 +626,6 @@ provision exists to support partial annotations of zero-duration events.
 Starting in JAMS-0.2.1, each annotation object will also contain optional \texttt{time} and
 \texttt{duration} field.  By convention, if these fields are left null, then the
 annotation should be assumed to span the entire track.
-
 
 %\subsection{Quick-view}
 

@@ -13,10 +13,6 @@
           "label": { "value": 1 },
           "time": { "value": 1.196 }
         },
-        {
-          "label": { "value": 2 },
-          "time": { "value": 1.904 }
-        },
         ...
       ]
     }
