@@ -242,13 +242,14 @@ comparable.
 
 To resolve these issues, JAMS-0.2 adopts an an\-notation-major (rather than task-major) structure.
 Instead of grouping annotations by task at the top-level, a JAMS-0.2 object contains a single list of \emph{Annotations}.
-This allows for the same core schema to be retained as new tasks are introduced, since there is no explicit dependence on the task
-definitions.
+\Cref{jams2} illustrates how the contents of the example in \cref{jams1} are encoded in
+JAMS-0.2.
+
+The annotation-major structure allows for the same core schema to be retained as new tasks 
+are introduced, since there is no explicit dependence on the task definitions.
 However, since all annotations are collected in a single, anonymous data structure, we will need a new way to distinguish between annotations for different tasks.
 This leads us to the task \emph{namespace} abstraction.
 
-\Cref{jams2} illustrates how the contents of the example in \cref{jams1} are encoded in
-JAMS-0.2.
 
 \subsection{Task namespaces}\label{sec:schema:namespace}
 Each annotation object declares its task through a string-valued field called \emph{namespace}.
@@ -393,7 +394,7 @@ data structure, \emph{e.g.}:
 >>> first_beat = ann.data[0].time
 \end{lstlisting}
 One advantage of this approach is that it would yield nearly identical code in any other
-language (such as JavaScript)
+language (such as JavaScript).
 
 However, in practice, working with data in this format can be somewhat cumbersome.
 For example, evaluation scripts (such as mir\_eval~\cite{raffel2014}) typically expect
@@ -516,8 +517,8 @@ a simple, consistent interface to evaluators, \emph{e.g.}:
 # Call the evaluator
 >>> scores = jams.eval.beat(ann_r, ann_e)
 \end{lstlisting}
-All evaluation bindings accept two annotations (reference and estimate), and additional
-keyword arguments which can be passed through to configure the evaluator.
+All evaluation bindings accept two annotations (\texttt{ref\-erence} and \texttt{estimate}), 
+and additional keyword arguments which can be passed through to configure the evaluator.
 Each evaluation binding also verifies that the input annotations belong to the 
 correct namespace(s) and pass validation.
 
