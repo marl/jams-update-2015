@@ -26,8 +26,10 @@
     numberstyle=\scriptsize,
     stepnumber=1,
     numbersep=8pt,
+    stringstyle=\color{black},
     showstringspaces=false,
     breaklines=true,
+    morestring=[b]",
     frame=lines,
     backgroundcolor=\color{background},
     literate=
@@ -151,6 +153,7 @@ Since these changes apply to the file structure definition itself, they are inde
 
 In JAMS-0.1, there are four basic data types:
 \begin{itemize}
+    \setlength\itemsep{0em}
     \item \emph{observation},
     \item \emph{event},
     \item \emph{range}, and
@@ -202,7 +205,8 @@ Finally, it forces the annotator to be explicit about the valid timing of an obs
 \begin{figure}
     \tiny
     \lstinputlisting[language=json]{jams01ex.txt}
-    \caption{Example of a JAMS-0.1 object.\label{jams1}}
+    \caption{Example of a JAMS-0.1 object.  The example has been abridged to highlight
+        schematic changes in JAMS-0.2.\label{jams1}}
 \end{figure}
 
 \begin{figure}
@@ -211,7 +215,7 @@ Finally, it forces the annotator to be explicit about the valid timing of an obs
     \caption{The contents of \cref{jams1} in JAMS-0.2 format.\label{jams2}}
 \end{figure}
 
-As illustrated in Figure~\cref{jams1}, JAMS-0.1 took a \emph{task-major} approach to structuring annotations.  A collection of supported tasks was
+As illustrated in \cref{jams1}, JAMS-0.1 took a \emph{task-major} approach to structuring annotations.  A collection of supported tasks was
 defined within the JAMS-0.1 schema, such as \emph{tag}, \emph{genre}, \emph{chord}, \emph{key}, \emph{melody}, \emph{etc}.  Annotations of a
 particular task would then be accessed by indexing the array of annotations corresponding to that task, \emph{e.g.}:
 \begin{lstlisting}[language=json]
@@ -243,10 +247,14 @@ definitions.
 However, since all annotations are collected in a single, anonymous data structure, we will need a new way to distinguish between annotations for different tasks.
 This leads us to the task \emph{namespace} abstraction.
 
+\Cref{jams2} illustrates how the contents of the example in \cref{jams1} are encoded in
+JAMS-0.2.
+
 \subsection{Task namespaces}\label{sec:schema:namespace}
 Each annotation object declares its task through a string-valued field called \emph{namespace}.
 A \emph{namespace} in JAMS-0.2 is simply a partial schema declaration which defines the following properties:
 \begin{itemize}
+    \setlength\itemsep{0em}
     \item an identifier, \emph{e.g.}, ``beat'' or ``tag\_cal500'';
     \item schema declarations for the \emph{value} and \emph{confidence} fields;
     \item whether data should be encoded in \emph{dense} or \emph{sparse} form; and
@@ -403,6 +411,7 @@ translating annotation data fields into a Pandas data frame
 object~\cite{mckinney-proc-scipy-2010} upon construction.
 The choice of using a data frame (rather than a numpy array) carries several advantages:
 \begin{itemize}
+    \setlength\itemsep{0em}
     \item labeled fields;
     \item heterogeneous data types;
     \item advanced query operations (join, merge, etc);

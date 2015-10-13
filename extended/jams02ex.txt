@@ -15,16 +15,16 @@
       "sandbox": {},
       "data": [
         {
-          "confidence": 1.0,
-          "duration": 0.0,
           "time": 1.196,
-          "value": 1.0
+          "duration": 0.0,
+          "value": 1.0,
+          "confidence": 1.0
         },
         {
-          "confidence": 1.0,
-          "duration": 0.0,
           "time": 1.904,
-          "value": 2.0
+          "duration": 0.0,
+          "value": 2.0,
+          "confidence": 1.0
         },
         ...
       ]
@@ -35,16 +35,16 @@
       "sandbox": {},
       "data": [
         {
-          "confidence": 1.0,
-          "duration": 1.172266,
           "time": 0.0,
-          "value": "N"
+          "duration": 1.172266,
+          "value": "N",
+          "confidence": 1.0
         },
         {
-          "confidence": 1.0,
-          "duration": 11.412972,
           "time": 1.172266,
-          "value": "D:min"
+          "duration": 11.412972,
+          "value": "D:min",
+          "confidence": 1.0
         },
         ...
       ]
@@ -55,16 +55,16 @@
       "sandbox": {},
       "data": [
         {
-          "confidence": 1.0,
-          "duration": 69.663,
           "time": 1.01,
-          "value": "D:minor"
+          "duration": 69.663,
+          "value": "D:minor",
+          "confidence": 1.0
         },
         {
-          "confidence": 1.0,
-          "duration": 5.757,
           "time": 70.673,
-          "value": "D"
+          "duration": 5.757,
+          "value": "D",
+          "confidence": 1.0
         },
         ...
       ]
@@ -75,16 +75,16 @@
       "sandbox": {},
       "data": [
         {
-          "confidence": 1.0,
-          "duration": 1.0,
           "time": 0.0,
-          "value": "silence"
+          "duration": 1.0,
+          "value": "silence",
+          "confidence": 1.0
         },
         {
-          "confidence": 1.0,
-          "duration": 34.861,
           "time": 1.0,
-          "value": "intro/verse"
+          "duration": 34.861,
+          "value": "intro/verse",
+          "confidence": 1.0
         }
         ...
       ]
