@@ -218,8 +218,9 @@ Different data sets are annotated using different vocabularies, which may be clo
 This implies that the validity of a tag annotation depends upon the target vocabulary, which is not explicitly coded within the schema.
 (Indeed, an exhaustive coding of \emph{all} tag vocabularies within a fixed schema is impossible.) 
 As a more nuanced example, \emph{chord} annotations can be drawn from different vocabularies (\emph{e.g.}, including or suppressing extensions),
-or even radically different annotation styles, such as the pop-style annotations of Isophonics compared to the roman numeral annotations of the
-Rock corpus.
+or even radically different annotation styles, such as the pop-style annotations of
+Isophonics~\cite{isophonicsbeatles} compared to the roman numeral annotations of the
+Rock corpus~\cite{de2011corpus}.
 In these cases, it is hardly sensible to group these variations together under a single task, since their annotations are not directly
 comparable.
 
@@ -365,7 +366,7 @@ the following:
 \subsection{Data frames}\label{sec:imp:dataframe}
 The JAMS1 implementation provided a direct object mapping between the JSON representation
 and its instantiation in Python.
-Consequently, the code to access the elementa of a JAMS object is a simple traversal of the
+Consequently, the code to access the elements of a JAMS object is a simple traversal of the
 data structure, \emph{e.g.}:
 \begin{lstlisting}[language=python]
 >>> ann = jam.beat[0]
@@ -409,7 +410,7 @@ Accessing individual observations in JAMS2 looks nearly identical to JAMS1
 >>> all_beats = ann.data.time
 \end{lstlisting}
 However, the \texttt{ann.data} object itself can now be operated upon as an array or
-data frame.exchange
+data frame.
 
 JAMS data frame objects interpret all \texttt{time} and \texttt{duration} fields as
 \texttt{timedelta} types.  In addition to facilitating semantic validation ---
@@ -561,7 +562,7 @@ custom code needed to support local extensions to the namespaces.
 In addition to expanded support for local modification, we plan to introduce three new
 namespaces in 0.2.1 as listed in \cref{tab:namespaces:0.2.1}.
 
-The \texttt{multi\_segment} namespace is similar to existing the \texttt{segment} 
+The \texttt{multi\_segment} namespace is similar to the existing \texttt{segment} 
 namespaces, except that it introduces an additional \emph{level} field to the values
 which can be used to encode a multi-layer or hierarchical segmentations.
 
@@ -604,7 +605,7 @@ Starting in JAMS-0.2.1, each annotation object will also contain optional \textt
 annotation should be assumed to span the entire track.
 
 
-\subsection{Quick-view}
+%\subsection{Quick-view}
 
 
 
