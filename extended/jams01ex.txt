@@ -1,0 +1,78 @@
+{
+  "file_metadata": {
+    "artist": "The Beatles",
+    "duration": { "value": 260.627 },
+    "jams_version": "0.0.1",
+    "title": "01_-_Come_Together"
+  },
+  "beat": [
+    {
+      "annotation_metadata": { ... },
+      "data": [
+        {
+          "label": { "value": 1 },
+          "time": { "value": 1.196 }
+        },
+        {
+          "label": { "value": 2 },
+          "time": { "value": 1.904 }
+        },
+        ...
+      ]
+    }
+  ],
+  "chord": [
+    {
+      "annotation_metadata": { ... },
+      "data": [
+        {
+          "start": { "value": 0.0 },
+          "end": { "value": 1.172266 },
+          "label": { "value": "N" }
+        },
+        {
+          "start": { "value": 1.172266 },
+          "end": { "value": 12.585238 },
+          "label": { "value": "D:min" }
+        },
+        ...
+      ]
+    }
+  ],
+  "key": [
+    {
+      "annotation_metadata": { ...  },
+      "data": [
+        {
+          "start": { "value": 0.0 },
+          "end": { "value": 1.01 },
+          "label": { "value": "Silence" }
+        },
+        {
+          "start": { "value": 1.01 },
+          "end": { "value": 70.673 },
+          "label": { "value": "Key\tD:minor" }
+        },
+        ...
+      ]
+    }
+  ],
+  "segment": [
+    {
+      "annotation_metadata": { ... },
+      "data": [
+        {
+          "start": { "value": 0.0 },
+          "end": { "value": 1.0 },
+          "label": { "value": "silence" }
+        },
+        {
+          "start": { "value": 1.0 },
+          "end": { "value": 35.861 },
+          "label": { "value": "intro/verse" }
+        },
+        ...
+      ]
+    }
+  ]
+}

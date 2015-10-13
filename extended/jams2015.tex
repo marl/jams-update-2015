@@ -199,6 +199,18 @@ Finally, it forces the annotator to be explicit about the valid timing of an obs
 
 \subsection{Task- vs. Annotation-major layout}\label{sec:schema:task}
 
+\begin{figure}
+    \tiny
+    \lstinputlisting[language=json]{jams01ex.txt}
+    \caption{Example of a JAMS-0.1 object.\label{jams1}}
+\end{figure}
+
+\begin{figure}
+    \tiny
+    \lstinputlisting[language=json]{jams02ex.txt}
+    \caption{The contents of \cref{jams1} in JAMS-0.2 format.\label{jams2}}
+\end{figure}
+
 As illustrated in Figure~\cref{jams1}, JAMS-0.1 took a \emph{task-major} approach to structuring annotations.  A collection of supported tasks was
 defined within the JAMS-0.1 schema, such as \emph{tag}, \emph{genre}, \emph{chord}, \emph{key}, \emph{melody}, \emph{etc}.  Annotations of a
 particular task would then be accessed by indexing the array of annotations corresponding to that task, \emph{e.g.}:
