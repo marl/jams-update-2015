@@ -286,7 +286,7 @@ Finally, namespaces are defined externally to the core schema, and new namespace
 This makes it possible to develop and share custom annotation specifications.
 
 \begin{table}
-    \caption{Namespaces supported in JAMS v0.2.}\label{tab:namespaces}
+    \caption{Namespaces supported in JAMS v0.2.0.}\label{tab:namespaces}
     \centering
     \begin{tabular}{rl}
     \toprule
@@ -409,7 +409,7 @@ label manipulation are simply easier with natively array-oriented representation
 
 Since JAMS-0.2 encodes all annotation data in a table-friendly format, we instead opted to
 provide a table-interface in the Python implementation.  This is accomplished by
-translating annotation data fields into a Pandas data frame
+translating annotation data fields into a \texttt{pandas} data frame
 object~\cite{mckinney-proc-scipy-2010} upon construction.
 The choice of using a data frame (rather than a numpy array) carries several advantages:
 \begin{itemize}
@@ -438,7 +438,7 @@ data frame.
 JAMS data frame objects interpret all \texttt{time} and \texttt{duration} fields as
 \texttt{timedelta} types.  In addition to facilitating semantic validation ---
 \texttt{time} and \texttt{duration} fields are enforced to contain non-negative values --- 
-this enables Pandas to efficiently align and resample multiple annotations with 
+this enables \texttt{pandas} to efficiently align and resample multiple annotations with 
 non-uniform timings.  Upon serialization, these values are converted back to raw floating
 point representations in units of seconds.
 
