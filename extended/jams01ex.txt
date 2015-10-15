@@ -10,12 +10,10 @@
       "annotation_metadata": { ... },
       "data": [
         {
-          "label": { "value": 1 },
-          "time": { "value": 1.196 }
+          "label": { "value": 1 }, "time": { "value": 1.196 }
         },
         {
-          "label": { "value": 2 },
-          "time": { "value": 1.904 }
+          "label": { "value": 2 }, "time": { "value": 1.904 }
         },
         ...
       ]
