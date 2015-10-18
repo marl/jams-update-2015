@@ -1,0 +1,77 @@
+{
+  "file_metadata": {
+    "artist": "The Beatles",
+    "duration": 260.627,
+    "identifiers": {},
+    "jams_version": "0.2.0",
+    "release": "",
+    "title": "01_-_Come_Together"
+  },
+  "sandbox": {},
+  "annotations": [
+    {
+      "namespace": "beat",
+      "annotation_metadata": { ... },
+      "sandbox": {},
+      "data": [
+        {
+          "time": 1.196, "duration": 0.0,
+          "value": 1.0, "confidence": 1.0
+        },
+        {
+          "time": 1.904, "duration": 0.0,
+          "value": 2.0, "confidence": 1.0
+        },
+        ...
+      ]
+    },
+    {
+      "namespace": "chord",
+      "annotation_metadata": { ... },
+      "sandbox": {},
+      "data": [
+        {
+          "time": 0.0, "duration": 1.172266,
+          "value": "N", "confidence": 1.0
+        },
+        {
+          "time": 1.172266, "duration": 11.412972,
+          "value": "D:min", "confidence": 1.0
+        },
+        ...
+      ]
+    },
+    {
+      "namespace": "key_mode",
+      "annotation_metadata": { ... },
+      "sandbox": {},
+      "data": [
+        {
+          "time": 1.01, "duration": 69.663,
+          "value": "D:minor", "confidence": 1.0
+        },
+        {
+          "time": 70.673, "duration": 5.757,
+          "value": "D", "confidence": 1.0
+        },
+        ...
+      ]
+    },
+    {
+      "namespace": "segment_open",
+      "annotation_metadata": { ... },
+      "sandbox": {},
+      "data": [
+        {
+          "time": 0.0, "duration": 1.0,
+          "value": "silence", "confidence": 1.0
+        },
+        {
+          "time": 1.0, "duration": 34.861,
+          "value": "intro/verse", "confidence": 1.0
+        }
+        ...
+      ]
+    }
+  ]
+}

@@ -6,11 +6,59 @@
 \documentclass{article}
 \usepackage{ismir,amsmath,cite}
 \usepackage{graphicx}
-\usepackage{color}
+\usepackage[table]{xcolor}
+\usepackage{listings}
+\usepackage{url}
+\usepackage{cleveref}
+\usepackage{authblk}
+\usepackage{booktabs}
+\usepackage{bera}
+\usepackage{multirow}
+
+\colorlet{punct}{red!60!black}
+\definecolor{background}{HTML}{EEEEEE}
+\definecolor{delim}{RGB}{20,105,176}
+\colorlet{numb}{magenta!60!black}
+
+\lstdefinelanguage{json}{
+    basicstyle=\normalfont\ttfamily,
+    numbers=none,
+    numberstyle=\scriptsize,
+    stepnumber=1,
+    numbersep=8pt,
+    stringstyle=\color{black},
+    showstringspaces=false,
+    breaklines=true,
+    morestring=[b]",
+    frame=lines,
+    backgroundcolor=\color{background},
+    literate=
+     *{0}{{{\color{numb}0}}}{1}
+      {1}{{{\color{numb}1}}}{1}
+      {2}{{{\color{numb}2}}}{1}
+      {3}{{{\color{numb}3}}}{1}
+      {4}{{{\color{numb}4}}}{1}
+      {5}{{{\color{numb}5}}}{1}
+      {6}{{{\color{numb}6}}}{1}
+      {7}{{{\color{numb}7}}}{1}
+      {8}{{{\color{numb}8}}}{1}
+      {9}{{{\color{numb}9}}}{1}
+      {:}{{{\color{punct}{:}}}}{1}
+      {,}{{{\color{punct}{,}}}}{1}
+      {\{}{{{\color{delim}{\{}}}}{1}
+      {\}}{{{\color{delim}{\}}}}}{1}
+      {[}{{{\color{delim}{[}}}}{1}
+      {]}{{{\color{delim}{]}}}}{1},
+}
+
+\lstset{language=python,frame=none,numbers=none}
+\lstset{language=json,frame=lines,numbers=none}
+
+\renewcommand\Authfont{\bfseries}
 
 % Title.
 % ------
-\title{Template for Extended Abstracts of the ISMIR~\conferenceyear\ Late-Breaking Demo Session}
+\title{Pump up the JAMS: v0.2 and beyond}
 
 % Multiple authors
 % To use with multiple author with possibly different addresses
@@ -39,10 +87,10 @@
 
 % Three addresses
 % --------------
-\threeauthors
-  {First author} {Affiliation1 \\ {\tt author1@ismir.edu}}
-  {Second author} {Affiliation2 \\ {\tt author2@ismir.edu}}
-  {Third author} {Affiliation3 \\ {\tt author3@ismir.edu}}
+%\threeauthors
+%  {First author} {Affiliation1 \\ {\tt author1@ismir.edu}}
+%  {Second author} {Affiliation2 \\ {\tt author2@ismir.edu}}
+%  {Third author} {Affiliation3 \\ {\tt author3@ismir.edu}}
 
 % Four addresses
 % --------------
@@ -52,160 +100,279 @@
 %  {Third author} {Affiliation3 \\ {\tt author3@ismir.edu}}
 %  {Fourth author} {Affiliation4 \\ {\tt author4@ismir.edu}}
 
+\author[1,2,*]{Brian~McFee}
+\author[4]{Eric~J. Humphrey}
+\author[5]{Oriol~Nieto}
+\author[1,3]{Justin~Salamon}
+\author[1]{Rachel~Bittner}
+\author[1]{Jon~Forsyth}
+\author[1]{Juan~P. Bello}
+\affil[1]{Music and Audio Research Laboratory, New York University}
+\affil[2]{Center for Data Science, New York University}
+\affil[3]{Center for Urban Science and Progress, New York University}
+\affil[4]{MuseAmi, Inc.}
+\affil[5]{Pandora, Inc.}
+
+\def\authorname{Brian~McFee, Eric~J. Humphrey, Oriol~Nieto, Justin~Salamon,
+    Rachel~M. Bittner, Jon~Forsyth, Juan~P. Bello}
+
 \begin{document}
 %
 \maketitle
 %
+\let\oldthefootnote\thefootnote%
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\footnotetext[1]{Please direct correspondence to \url{brian.mcfee@nyu.edu}}
+\let\thefootnote\oldthefootnote%
+%
 \begin{abstract}
-The abstract should be placed at the top left column and should contain about 150-200 words.
+This document describes the changes to the JSON Annotated Music Specification (JAMS)
+format and implementation between v0.1 and v0.2.
 \end{abstract}
 %
 \section{Introduction}\label{sec:introduction}
 
-This template includes all the information about formatting extended abstracts for the Late-Breaking Demo Session of the ISMIR \conferenceyear\ Conference.
-Please follow these guidelines to give the final proceedings a uniform look.
-Most of the required formatting is achieved automatically by using the supplied
-style file (\LaTeX) or template (Word).
-If you have any questions, please contact the Program Committee
-(\texttt{ismir\conferenceyear-latebreak@ismir.net}).
-This template can be downloaded from the ISMIR \conferenceyear\ web site (\texttt{http://ismir\conferenceyear.ismir.net}).
-%
-\section{Extended Abstract Length}
-In contrast to regular papers, authors are required to submit one-page (preferred) or two-page (maximum) extended abstracts.
+The JSON Annotated Music Specification (JAMS) format was proposed by Humphrey \emph{et al.}~\cite{jams2014}
+as a mechanism to serialize structured annotations for musical content.
+Since the initial publication of the JAMS specification, we (the developers) have learned several lessons in building music information retrieval infrastructure on top of the existing
+framework.
+Consequently, we have revised the specification and implementation in various ways to better support a modern and extensible workflow.
+The purpose of this document is to explain the changes in JAMS following the first publication, describe their underlying motivation, and discuss the potential additions in future versions.
 
-\section{Page Size}\label{sec:page_size}
+Throughout this document, the previous specification of JAMS as described by Humphrey
+\emph{et al.}~\cite{jams2014} will be referred to as \emph{JAMS-0.1}, while the current
+specification will be referred to as \emph{JAMS-0.2}.
 
-The extended abstracts will be formatted as \underline{portrait A4-size} \underline{paper (21.0cm x 29.7cm)}. All material on each page should fit within a rectangle of 17.2cm x 25.2cm, centered on the page, beginning 2.0cm from the top of the page and ending with 2.5cm from the bottom. The left and right margins should be 1.9cm. The text should be in two 8.2cm columns with a 0.8cm gutter. All text must be in a two-column format. Text must be fully justified.
+\section{JAMS specification}\label{sec:schema}
+In this section, we highlight the changes to the JAMS schema definition(s).
+Since these changes apply to the file structure definition itself, they are independent of the software implementation used to parse or generate JAMS files.\footnote{The software implementation of JAMS is available at \url{https://github.com/marl/jams}.}
 
-\section{Typeset Text}\label{sec:typeset_text}
 
-\subsection{Normal or Body Text}\label{subsec:body}
+\subsection{Unified observation types}\label{sec:schema:annotations}
 
-Please use a 10pt (point) Times font. Sans-serif or non-proportional fonts
-can be used only for special purposes, such as distinguishing source code text.
+JAMS-0.2 reduces all observation types (i.e., observation, range, and time series) to a single format: regardless of task, each \emph{observation} consists of a 4-tuple \emph{(time, duration, value, confidence)}.
+The \emph{time} and \emph{duration} fields are constrained by the schema to be non-negative numbers.\footnote{The \emph{value} and
+\emph{confidence} fields are left unconstrained at this point, but are defined subsequently depending on the \emph{namespace} as defined in \cref{sec:schema:task}.}
+By default, this simulates the \emph{range} type of JAMS-0.1, but taking \emph{duration}$=0$ recovers the \emph{event}
+type as well, with a small amount of redundancy.
 
-The first paragraph in each section should not be indented, but all other paragraphs should be.
+\sloppy In order to avoid redundancy and improve efficiency, JAMS-0.2 allows a distinction between \emph{sparse} and \emph{dense} observation lists.
+Having standardized the observation format, the \emph{Annotation}'s data field, which contains a list of observations, can be interpreted as an $n\times 4$ table, which may be encoded in either a row-major (\emph{sparse}) or column-major (\emph{dense}) format.
+While the column-major format is generally more spatially efficient, the row-major format is more human-legible, and for most tasks, the difference in efficiency is negligible.
 
-\subsection{Title and Authors}
+%Standardizing the observation format both simplifies upstream code to interact with JAMS objects, and generalizes the previous definitions. 
+%(For instance, time series now have explicit durations/sampling rates, and gaps in observations are now permitted.)
+%The one thing that we lose in this process is the notion of time-independent annotations, such as \emph{tag}, \emph{genre}, and \emph{mood} 
+%in JAMS-0.1.
+%This is because all observations in JAMS-0.2 are required to have a time and (potentially 0) duration.
+%However, we argue that this is an advantage for three reasons.
+%First, it is possible to have full-track observations by setting \emph{time}$=0$ and $\emph{duration}$ to the full track duration, so no functionality is lost.
+%Second, in reality, every observation type may vary over time, so the schema should support this explicitly.
+%Finally, it forces the annotator to be explicit about the valid timing of an observation, and facilitates partial annotation (see \cref{sec:future}).
 
-The title is 14pt Times, bold, caps, upper case, centered.
-Authors' names are omitted when submitting for double-blind reviewing.
-The following is for making a camera-ready version.
-Authors' names are centered.
-The lead author's name is to be listed first (left-most), and the co-authors' names after.
-If the addresses for all authors are the same, include the address only once, centered.
-If the authors have different addresses, put the addresses, evenly spaced, under each authors' name.
+\subsection{Task- vs. Annotation-major layout}\label{sec:schema:task}
 
-\subsection{First Page Copyright Notice}
+%\begin{figure}
+    %\tiny
+    %\lstinputlisting[language=json, basicstyle=\scriptsize]{jams01ex.txt}
+    %\caption{Example of a JAMS-0.1 object.  The example has been abridged to highlight
+        %schematic changes in JAMS-0.2.\label{jams1}}
+%\end{figure}
 
-Please include the copyright notice exactly as it appears here in the lower left-hand corner of the page.
-It is set in 8pt Times.
+%\begin{figure}
+    %\tiny
+    %\lstinputlisting[language=json, basicstyle=\scriptsize]{jams02ex.txt}
+    %\caption{The contents of \cref{jams1} in JAMS-0.2 format.\label{jams2}}
+%\end{figure}
 
-\subsection{Page Numbering, Headers and Footers}
+%As illustrated in \cref{jams1}, JAMS-0.1 took a \emph{task-major} approach to structuring annotations.  A collection of supported tasks was
+%defined within the JAMS-0.1 schema, such as \emph{tag}, \emph{genre}, \emph{chord}, \emph{key}, \emph{melody}, \emph{etc}.  Annotations of a
+%particular task would then be accessed by indexing the array of annotations corresponding to that task, \emph{e.g.}:\\
+%\begin{lstlisting}[language=json]
+  %jams_object.beat[0]
+%\end{lstlisting}
 
-Do not include headers, footers or page numbers in your submission.
-These will be added when the publications are assembled.
+%This structure is conceptually simple and easy to work with, but it poses several practical limitations.
+%First, it requires that all tasks be specified \emph{a priori} within the JAMS schema.
+%Consequently, each time a new task is introduced in the future, the core JAMS schema must be modified to accommodate it.
+%This is clearly undesirable, as it could lead to fragmentation of the JAMS specification if (when) different groups decide to extend the task definitions in one direction or another.
 
-\section{First Level Headings}
+%Second, it provides no means of distinguishing between different variations of a task.
+%As a simple example, take the case of \emph{tags}.
+%Different data sets are annotated using different vocabularies, which may be closed
+%(\emph{e.g.}, GTZAN~\cite{gtzan} or CAL500~\cite{cal500}) or open (\emph{e.g.}, last.fm).
+%This implies that the validity of a tag annotation depends upon the target vocabulary, which is not explicitly coded within the schema.
+%(Indeed, an exhaustive coding of \emph{all} tag vocabularies within a fixed schema is impossible.) 
+%As a more nuanced example, \emph{chord} annotations can be drawn from different vocabularies (\emph{e.g.}, including or suppressing extensions),
+%or even radically different annotation styles, such as the pop-style annotations of
+%Isophonics~\cite{isophonicsbeatles} compared to the roman numeral annotations of the
+%Rock Corpus~\cite{de2011corpus}.
+%In these cases, it is hardly sensible to group these variations together under a single task, since their annotations are not directly
+%comparable.
 
-First level headings are in Times 10pt bold,
-centered with 1 line of space above the section head, and 1/2 space below it.
-For a section header immediately followed by a subsection header, the space should be merged.
+JAMS-0.2 adopts an an\-notation-major (rather than task-major) structure.
+Instead of grouping annotations by task at the top-level as in JAMS-0.1, a JAMS-0.2 object contains a single list of \emph{Annotations}.
+The annotation-major structure allows for the same core schema to be retained as new tasks are introduced, since there is no explicit dependence on the task definitions.
+However, since all annotations are collected in a single, anonymous data structure, we will need a new way to distinguish between annotations for different tasks.
+This leads us to the task \emph{namespace} abstraction.
 
-\subsection{Second Level Headings}
 
-Second level headings are in Times 10pt bold, flush left,
-with 1 line of space above the section head, and 1/2 space below it.
-The first letter of each significant word is capitalized.
+\subsection{Task namespaces}\label{sec:schema:namespace}
+Each annotation object declares its task through a string-valued field called \emph{namespace}.
+A \emph{namespace} in JAMS-0.2 is simply a partial schema declaration which defines the following properties:
+\begin{itemize}
+    \setlength\itemsep{0em}
+    \item an identifier, \emph{e.g.}, ``beat'' or ``tag\_cal500'';
+    \item schema declarations for the \emph{value} and \emph{confidence} fields;
+    \item whether data should be encoded in \emph{dense} or \emph{sparse} form; and
+    \item a brief plain-text description of the task.
+\end{itemize}
+The identifier is included within \emph{Annotation} objects to specify which namespace they should be validated against.
+The schema declarations for \emph{value} and \emph{confidence} are both optional, but can be used to impose constraints on the permissible
+contents of an observation.\footnote{The term \emph{namespace} was chosen to connote that
+the \texttt{value} and \emph{confidence} fields keep the same \emph{name} in different
+tasks, but their interpretation varies according to \emph{namespace}.  This is analogous
+to the notion of namespace encapsulations in software engineering.}
 
-\subsubsection{Third and Further Level Headings}
+%This abstraction allows for both a more general set of supported tasks, in that there may be many \emph{tag} namespaces, 
+%and more precise task definitions for each specific namespace.
+%For instance, a valid \emph{tag\_cal500} annotation must have a value drawn from the correct vocabulary, whereas a \emph{tag\_open}
+%annotation may contain any string in its \emph{value} field; however, in both cases, the value must be a string, and this constraint was
+%not possible in the JAMS-0.1 schema.
 
-Third level headings are in Times 10pt italic, flush left,
-with 1/2 line of space above the section head, and 1/2 space below it.
-The first letter of each significant word is capitalized.
+%With the namespace abstraction, it is possible for observations to have arbitrarily structured value and confidence fields.
+%\Cref{fig:thayer} provides a complete example namespace definition for \emph{mood\_thayer} annotations, in which each observed value is an ordered pair of numbers encoding \emph{valence}
+%and \emph{arousal} in the Thayer mood model~\cite{thayer}.
 
-Using more than three levels of headings is highly discouraged.
+For convenience, namespaces are grouped into high-level task categories by their identifiers.
+We stress that this grouping is merely cosmetic, and there is no strict underlying hierarchy of tasks.
+Finally, namespaces are defined externally to the core schema, and new namespaces can be imported dynamically with no modifications to the JAMS implementation itself.
+This makes it possible to develop and share custom annotation specifications.
 
-\section{Footnotes and Figures}
+%\begin{table}
+    %\caption{Namespaces supported in JAMS v0.2.0.}\label{tab:namespaces}
+    %\centering
+    %\begin{tabular}{rl}
+    %\toprule
+    %Task group                  & Namespace\\
+    %\midrule
+    %Beat       & \texttt{beat}\\
+                                %& \texttt{beat\_position}\\
+%\\
+    %Chord      & \texttt{chord}\\
+                                %& \texttt{chord\_harte}\\
+                                %& \texttt{chord\_roman}\\
+%\\
+    %Key                         & \texttt{key\_mode }\\
+%\\
+    %Lyrics                      & \texttt{lyrics}\\
+%\\
+    %Mood                        & \texttt{mood\_thayer}\\
+%\\
+    %Onset                       & \texttt{onset}\\
+%\\
+    %Pattern                     & \texttt{pattern\_jku}\\
+%\\
+    %Pitch      & \texttt{pitch\_class}\\
+                                %& \texttt{pitch\_hz}\\
+                                %& \texttt{pitch\_midi}\\
+%\\
+    %Segment    & \texttt{segment\_open}\\
+                                %& \texttt{segment\_salami\_function}\\
+                                %& \texttt{segment\_salami\_upper}\\
+                                %& \texttt{segment\_salami\_lower}\\
+                                %& \texttt{segment\_salami\_tut}\\
+%\\
+    %Tag        & \texttt{tag\_cal10k}\\
+                                %& \texttt{tag\_cal500}\\
+                                %& \texttt{tag\_gtzan}\\
+                                %& \texttt{tag\_medleydb\_instruments}\\
+                                %& \texttt{tag\_open}\\
+%\\
+    %Tempo                       & \texttt{tempo}\\
+    %\bottomrule
+    %\end{tabular}
+%\end{table}
 
-\subsection{Footnotes}
 
-Indicate footnotes with a number in the text.\footnote{This is a footnote.}
-Use 8pt type for footnotes. Place the footnotes at the bottom of the page on which they appear.
-Precede the footnote with a 0.5pt horizontal rule.
+%\begin{figure}
+    %\begin{lstlisting}[language=json,title={mood\_thayer.json}]
+%{"mood_thayer":
+    %{
+        %"value": {
+            %"type": "array",
+            %"items": {"type": "number"},
+            %"minItems": 2,
+            %"maxItems": 2
+        %},
+        %"dense": false,
+        %"description": "Time-varying emotional measurements as ordered pairs of (valence, arousal)"
+    %}
+%}
+%\end{lstlisting}
+%\caption{An example namespace definition file for \emph{mood\_thayer}.  Each observed
+%value is an array of exactly two numbers, and observations are packed sparsely.  No
+%constraints are placed upon the \emph{confidence} field.\label{fig:thayer}}
+%\end{figure}
 
-\subsection{Figures, Tables and Captions}
 
-All artwork must be centered, neat, clean, and legible.
-All lines should be very dark for purposes of reproduction and art work should not be hand-drawn.
-The proceedings are not in color, and therefore all figures must make sense in black-and-white form.
-Figure and table numbers and captions always appear below the figure.
-Leave 1 line space between the figure or table and the caption.
-Each figure or table is numbered consecutively. Captions should be Times 10pt.
-Place tables/figures in text as close to the reference as possible.
-References to tables and figures should be capitalized, for example:
-see \figref{fig:example} and \tabref{tab:example}.
-Figures and tables may extend across both columns to a maximum width of 17.2cm.
+\section{Future directions}\label{sec:future}
 
-\begin{table}
- \begin{center}
- \begin{tabular}{|l|l|}
-  \hline
-  String value & Numeric value \\
-  \hline
-  Hello ISMIR  & \conferenceyear \\
-  \hline
- \end{tabular}
-\end{center}
- \caption{Table captions should be placed below the table.}
- \label{tab:example}
-\end{table}
+Many of the existing namespaces are similar enough to share common representations and evaluation schemes, and can therefore be grouped into high-level categories.
+In some cases, it is even possible to construct explicit mappings between namespaces.  
+This can be useful for simultaneously modeling or comparing data from different corpora.
+Although complicated, implementing automatic namespace conversion --- even if it is occasionally non-invertible --- would be valuable for simplifying modeling and evaluation of tasks across different datasets.
 
-\begin{figure}
- \centerline{\framebox{
- \includegraphics[width=\columnwidth]{figure.png}}}
- \caption{Figure captions should be placed below the figure.}
- \label{fig:example}
-\end{figure}
 
-\section{Equations}
+JAMS-0.2 provides functionality for local extensions of the supported namespaces, but it can be tedious to add namespace definitions manually in each application.  
+We therefore plan to introduce functionality to support a \emph{local} namespace repository, in addition to the definitions which ship in the main distribution.  
+This repository would be specified by an environment variable or configuration file, and reduce the amount of custom code needed to support local extensions to the namespaces.
 
-Equations should be placed on separate lines and numbered.
-The number should be on the right side, in parentheses, as in \eqnref{relativity}.
+%In addition to expanded support for local modification, we plan to introduce three new
+%namespaces in 0.2.1 as listed in \cref{tab:namespaces:0.2.1}.
 
-\begin{equation}\label{relativity}
-E=mc^{2}
-\end{equation}
+%The \texttt{multi\_segment} namespace is similar to the existing \texttt{segment} 
+%namespaces, except that it introduces an additional \emph{level} field to the values
+%which can be used to encode a multi-layer or hierarchical segmentations.
 
-\section{Citations}
+%The \texttt{vector} namespace provides values which are arbitrary arrays of numbers.
+%This can be useful for regression problems in which the annotation targets are
+%vector-valued, such as collaborative filter prediction, or higher-dimensional 
+%extensions of the Thayer mood model.  The \texttt{vector} namespace does not enforce that
+%each observation's array is of the same length, so great care must be taken in
+%documenting annotations using this namespace.
 
-All bibliographical references should be listed at the end,
-inside a section named ``REFERENCES,'' numbered and in alphabetical order.
-All references listed should be cited in the text.
-When referring to a document, type the number in square brackets
-\cite{Author:00}, or for a range \cite{Author:00,Someone:10,Someone:04}.
+%The \texttt{blob} namespace can be used to store arbitrarily structured values which
+%don't otherwise fit in an existing schema.  This namespace should be viewed as a last
+%resort to storing within JAMS.  Whenever possible, we recommend using the most specific
+%namespace that characterizes the annotations of interest.
 
-% For bibtex users:
+%\begin{table}
+    %\caption{New namespaces planned for JAMS v0.2.1.}\label{tab:namespaces:0.2.1}
+    %\centering
+    %\begin{tabular}{rl}
+    %\toprule
+    %Task group                  & Namespace\\
+    %\midrule
+    %Misc       & \texttt{blob}\\
+                                %& \texttt{vector}\\
+                                %\\
+    %Segment                     & \texttt{multi\_segment}\\
+    %\bottomrule
+    %\end{tabular}
+%\end{table}
+
+
+Annotations may not span the entire duration of a track.  
+Ideally, annotations should therefore define the time extent over which the annotation is valid.  
+While JAMS-0.2 provided some functionality to encode this (via the \emph{duration} fields or a sandbox entry) it was not standardized, and no provision exists to support partial annotations of zero-duration events.
+Starting in JAMS-0.2.1, each annotation object will also contain optional \texttt{time} and \texttt{duration} field.  
+By convention, if these fields are left null, then the annotation should be assumed to span the entire track.
+
+%\subsection{Quick-view}
+
+
+
 \bibliography{refs}
-
-% For non bibtex users:
-%\begin{thebibliography}{citations}
-%
-%\bibitem {Author:00}
-%E. Author.
-%``The Title of the Conference Paper,''
-%{\it Proceedings of the International Symposium
-%on Music Information Retrieval}, pp.~000--111, 2000.
-%
-%\bibitem{Someone:10}
-%A. Someone, B. Someone, and C. Someone.
-%``The Title of the Journal Paper,''
-%{\it Journal of New Music Research},
-%Vol.~A, No.~B, pp.~111--222, 2010.
-%
-%\bibitem{Someone:04} X. Someone and Y. Someone. {\it Title of the Book},
-%    Editorial Acme, Porto, 2012.
-%
-%\end{thebibliography}
 
 \end{document}
