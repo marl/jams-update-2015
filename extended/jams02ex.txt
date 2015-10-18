@@ -50,10 +50,6 @@
           "time": 1.01, "duration": 69.663,
           "value": "D:minor", "confidence": 1.0
         },
-        {
-          "time": 70.673, "duration": 5.757,
-          "value": "D", "confidence": 1.0
-        },
         ...
       ]
     },
